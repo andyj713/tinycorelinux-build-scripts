@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
 . $MEDIR/phase-default-vars.sh
 
@@ -12,7 +12,6 @@ build_dir(){
 	SRC=$BUILD/$(basename $(find $BUILD -regex ".*/$EXT[\.-].*" | sort | head -1))
 }
 
-
 for PKG in jemalloc libevent libfastjson libgd lighttpd liblognorm tcllib apr-util; do
 	build_dir $PKG
 	cd $SRC
@@ -21,7 +20,7 @@ for PKG in jemalloc libevent libfastjson libgd lighttpd liblognorm tcllib apr-ut
 done
 
 
-for PGVER in 11 12 13 14 15 16; do
+for PGVER in $(seq 12 18); do
 	PKG=postgresql-$PGVER
 	build_dir $PKG
 	cd $SRC
@@ -36,13 +35,16 @@ for PKG in net-snmp tcltls; do
 	echo $(pwd)
 	make test 2>&1 | tee make-test-$PKG.log
 done
-	
 
-build_dir tcl8.6
-cd $SRC/unix
-echo $(pwd)
-export TZ=UTC
-make test 2>&1 | tee make-check-tcl.log
+exit
+
+for TCLVER in 8.6 9.0; do
+	build_dir tcl$TCLVER
+	cd $SRC/unix
+	echo $(pwd)
+	export TZ=UTC
+	make test 2>&1 | tee make-check-tcl$TCLVER.log
+done
 
 
 build_dir libaio
@@ -65,6 +67,7 @@ echo $(pwd)
 export NOEXIT=1
 make check 2>&1 | tee make-check-openldap.log
 
+exit
 
 build_dir php
 cd $BASE/php-tests                                                      

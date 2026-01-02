@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
 EXT=dhcp
 
@@ -11,15 +11,8 @@ EXT=dhcp
 DEPS="perl5"
 
 . $MEDIR/phase-default-deps.sh
-
-OL=s
-if [ "$KBITS" == 32 ] ; then
-        export CC="gcc -march=i686 -mtune=i686 -O$OL -pipe -fcommon"
-        export CXX="g++ -march=i686 -mtune=i686 -O$OL -pipe -fno-exceptions -fno-rtti"
-else
-        export CC="gcc -mtune=generic -O$OL -pipe -fcommon"
-        export CXX="g++ -mtune=generic -O$OL -pipe -fno-exceptions -fno-rtti"
-fi
+test $KBITS = 32 && MARCH=i586
+. $MEDIR/phase-cc-opts-no-flto.sh
 
 sed -i -e '/STD_CWARNINGS="$STD_CWARNINGS -Wall -Werror -fno-strict-aliasing"/s/ -Werror//' configure
 

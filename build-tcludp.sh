@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
 EXT=tcludp
 
@@ -12,7 +12,18 @@ DEPS="tcl8.6 tcl8.6-dev"
 
 . $MEDIR/phase-default-deps.sh
 . $MEDIR/phase-default-cc-opts.sh
-. $MEDIR/phase-default-config.sh
+
+export LDFLAGS="-lm"
+
+./configure \
+        --prefix=/usr/local \
+        --localstatedir=/var \
+        --disable-rpath \
+        --enable-64bit \
+        --enable-threads \
+        --enable-shared \
+        || exit
+
 . $MEDIR/phase-default-make.sh
 . $MEDIR/phase-default-make-install.sh
 

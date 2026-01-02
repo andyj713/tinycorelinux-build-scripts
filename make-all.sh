@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
 . $MEDIR/phase-default-vars.sh
 . $MEDIR/phase-make-funcs.sh
@@ -34,19 +34,21 @@ done
 build_one nghttp2 libnghttp2
 build_one onig libonig
 build_one tidy-html5 libtidy
-build_one cyrus-sasl cyrus-sasl-lite
-test "$KBITS" == "64" && build_one tzdb tzdata
+#build_one cyrus-sasl cyrus-sasl-lite
+#test "$KBITS" == "64" && build_one tzdb tzdata
+build_one tzdb tzdata
 test "$KBITS" == "64" && build_one log4cplus 
 
-TCLVER=8.6.14
+TCLVER=8.6
+TCLPATCH=$TCLVER.17
 
 cd $BUILD
-sudo rm -rf $BUILD/tcl$TCLVER
-tar xf $SOURCE/tcl$TCLVER-src.tar.gz
-cd $BUILD/tcl$TCLVER/unix
-echo -e "\n=====  build-tcl.sh =====\n"
-$PROD/build-tcl.sh
-copy_tcz tcl8.6
+sudo rm -rf $BUILD/tcl$TCLPATCH
+tar xf $SOURCE/tcl$TCLPATCH-src.tar.gz
+cd $BUILD/tcl$TCLPATCH/unix
+echo -e "\n=====  build-tcl$TCLVER.sh =====\n"
+$PROD/build-tcl$TCLVER.sh
+copy_tcz tcl$TCLVER
 
 
 ## tier 2
@@ -56,20 +58,21 @@ for x in bind dhcp tcllib libgd liblognorm openldap
 	do build_one $x
 done
 
-for x in 16 15 14 13 12
+for x in $(seq 12 18)
 	do build_one postgresql postgresql "-$x" "$x"
 done
 
-TKVER=$TCLVER
-TKPATCH=""
+TKVER=${TCLVER}
+TKPATCH=${TCLPATCH}
 
 cd $BUILD
-sudo rm -rf $BUILD/tk$TKVER
-tar xf $SOURCE/tk$TKVER$TKPATCH-src.tar.gz
-cd $BUILD/tk$TKVER/unix
-echo -e "\n=====  build-tk.sh =====\n"
-$PROD/build-tk.sh
-copy_tcz tk8.6
+sudo rm -rf $BUILD/tk$TKPATCH
+tar xf $SOURCE/tk$TKPATCH-src.tar.gz
+cd $BUILD/tk$TKPATCH/unix
+echo -e "\n=====  build-tk$TKVER.sh =====\n"
+$PROD/build-tk$TKVER.sh
+copy_tcz tk$TKVER
+
 
 
 cd $BUILD
@@ -96,7 +99,7 @@ $PROD/build-pgtclng.sh
 copy_tcz pgtclng 
 
 
-build_one cyrus-sasl
+#build_one cyrus-sasl
 
 
 ## tier 4
@@ -105,8 +108,6 @@ build_one cyrus-sasl
 for x in apr-util net-snmp
 	do build_one $x
 done
-
-test "$KBITS" == 64 && build_one kea
 
 ## tier 5
 
@@ -120,7 +121,7 @@ done
 
 # tier 6
 
-for x in 8.1 8.2 8.3
+for x in 8.1 8.2 8.3 8.4 8.5
 	do build_one php-$x
 done
 
@@ -145,6 +146,7 @@ $PROD/build-gvim.sh $SVER
 copy_tcz gvim
 
 
+test "$KBITS" == 64 && build_one kea
 
 build_one open-vm-tools
 
@@ -154,8 +156,6 @@ build_one rxvt-unicode rxvt
 
 build_one iftop
 
-build_one rsyslog
-
 build_one xtables-addons xtables-addons "-$(uname -r)"
 
 cd $BUILD
@@ -163,4 +163,32 @@ sudo rm -rf $BUILD/LE
 echo -e "\n=====  build-xt_geoip.sh =====\n"
 $PROD/build-xt_geoip.sh
 copy_tcz xt_geoip_LE_IPv4
+
+
+build_one rsyslog
+
+
+TCLVER=9.0
+TCLPATCH=$TCLVER.3
+
+cd $BUILD
+sudo rm -rf $BUILD/tcl$TCLPATCH
+tar xf $SOURCE/tcl$TCLPATCH-src.tar.gz
+cd $BUILD/tcl$TCLPATCH/unix
+echo -e "\n=====  build-tcl$TCLVER.sh =====\n"
+$PROD/build-tcl$TCLVER.sh
+copy_tcz tcl$TCLVER
+
+
+TKVER=${TCLVER}
+TKPATCH=${TCLPATCH}
+
+cd $BUILD
+sudo rm -rf $BUILD/tk$TKPATCH
+tar xf $SOURCE/tk$TKPATCH-src.tar.gz
+cd $BUILD/tk$TKPATCH/unix
+echo -e "\n=====  build-tk$TKVER.sh =====\n"
+$PROD/build-tk$TKVER.sh
+copy_tcz tk$TKVER
+
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
 EXT=open-vm-tools
 
@@ -17,6 +17,8 @@ DEPS="glibc_apps libtool-dev procps-ng-dev
 USETIRPC=" --without-tirpc"
 
 case $TCVER in
+	64-16 ) DEPS="$DEPS pcre21042-dev fuse-dev libtirpc-dev rpcsvc-proto" ; USETIRPC=" --with-tirpc" ;;
+	32-16 ) DEPS="$DEPS pcre21042-dev fuse-dev libtirpc-dev rpcsvc-proto" ; USETIRPC=" --with-tirpc" ;;
 	64-15 ) DEPS="$DEPS pcre21042-dev fuse-dev libtirpc-dev rpcsvc-proto" ; USETIRPC=" --with-tirpc" ;;
 	32-15 ) DEPS="$DEPS pcre21042-dev fuse-dev libtirpc-dev rpcsvc-proto" ; USETIRPC=" --with-tirpc" ;;
 	64-14 ) DEPS="$DEPS pcre-dev fuse-dev libtirpc-dev rpcsvc-proto" ; USETIRPC=" --with-tirpc" ;;
@@ -249,9 +251,8 @@ done
 
 ### fix up files
 
+mv $TCZ/usr/bin/vm-support $TCZ/usr/local/bin
 mv $TCZ/lib/udev $TCZ/usr/local/etc
-rm -rf $TCZ/lib
-rm -rf $TCZ/sbin
 mkdir -p $TCZ/etc/vmware-tools/scripts/poweroff-vm-default.d
 mkdir -p $TCZ/etc/vmware-tools/scripts/poweron-vm-default.d
 mkdir -p $TCZ/etc/vmware-tools/scripts/suspend-vm-default.d
@@ -261,11 +262,17 @@ mkdir -p $TCZ/etc/vmware-tools/scripts/resume-vm-default.d
 
 mv $TCZ/etc/xdg $TCZ-desktop/usr/local/etc
 
-mkdir -p $TCZ-desktop/usr/local/lib/$EXT/plugins
+mkdir -p $TCZ-desktop/usr/local/lib/$EXT/plugins/vmsvc
 mv $TCZ/usr/local/lib/$EXT/plugins/vmusr $TCZ-desktop/usr/local/lib/$EXT/plugins
+mv $TCZ/usr/local/lib/$EXT/plugins/vmsvc/libresolutionKMS.so $TCZ-desktop/usr/local/lib/$EXT/plugins/vmsvc
 
 mkdir -p $TCZ-desktop/usr/local/bin
 mv $TCZ/usr/local/bin/vmware-user* $TCZ-desktop/usr/local/bin
+mv $TCZ/usr/local/bin/vmwgfxctrl $TCZ-desktop/usr/local/bin
+
+rm -rf $TCZ/lib
+rm -rf $TCZ/sbin
+rm -rf $TCZ/usr/bin
 
 ### set file permissions and ownership
 

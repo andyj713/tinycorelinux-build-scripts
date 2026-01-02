@@ -1,33 +1,35 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
 EXT=bind
 
 . $MEDIR/phase-default-vars.sh
 . $MEDIR/phase-default-init.sh
 
-
-DEPS="perl5 libuv-dev libcap-dev libpcap-dev jemalloc-dev
-	readline-dev zlib_base-dev libnghttp2-dev"
+PYDEPS=""
 NOPY=""
-
 case $TCVER in
-	64-15 ) DEPS="$DEPS openssl-dev python3.9-dev py3.9-ply" ;;
-	32-15 ) DEPS="$DEPS openssl-dev python3.6-dev python3.6-ply" ;;
-	64-14 ) DEPS="$DEPS openssl-dev python3.9-dev py3.9-ply" ;;
-	32-14 ) DEPS="$DEPS openssl-dev python3.6-dev python3.6-ply" ;;
-	64-13 ) DEPS="$DEPS openssl-1.1.1-dev python3.6-dev python3.6-ply" ;;
-	32-13 ) DEPS="$DEPS openssl-1.1.1-dev python3.6-dev python3.6-ply" ;;
-	64-12 ) DEPS="$DEPS openssl-1.1.1-dev python3.6-dev python3.6-ply" ;;
-	32-12 ) DEPS="$DEPS openssl-1.1.1-dev python3.6-dev python3.6-ply" ;;
-	64-11 ) DEPS="$DEPS openssl-1.1.1-dev python3.6-dev python3.6-ply" ;;
-	32-11 ) DEPS="$DEPS openssl-1.1.1-dev python3.6-dev python3.6-ply" ;;
-	64-10 ) DEPS="$DEPS openssl-1.1.1-dev python-dev python-ply" ;;
-	32-10 ) DEPS="$DEPS openssl-1.1.1-dev python-dev python-ply" ;;
-	* ) DEPS="$DEPS openssl-dev" ; NOPY="--without-python" ;;
+	64-16 ) PYDEPS="python3.9-dev py3.9-ply" ;;
+	32-16 ) PYDEPS="python3.6-dev python3.6-ply" ;;
+	64-15 ) PYDEPS="python3.9-dev py3.9-ply" ;;
+	32-15 ) PYDEPS="python3.6-ply" ;;
+	64-14 ) PYDEPS="python3.6-ply" ;;
+	32-14 ) PYDEPS="python3.6-ply" ;;
+	64-13 ) PYDEPS="python3.6-ply" ;;
+	32-13 ) PYDEPS="python3.6-ply" ;;
+	64-12 ) PYDEPS="python3.6-ply" ;;
+	32-12 ) PYDEPS="python3.6-ply" ;;
+	64-11 ) PYDEPS="python3.6-ply" ;;
+	32-11 ) PYDEPS="python3.6-ply" ;;
+	64-10 ) PYDEPS="python-ply" ;;
+	32-10 ) PYDEPS="python-ply" ;;
+	* ) NOPY="--without-python" ;;
 esac
+
+DEPS="$DBDEPS $PYDEPS perl5 libuv-dev libcap-dev libpcap-dev jemalloc-dev
+	readline-dev zlib_base-dev libnghttp2-dev liburcu-dev"
 
 . $MEDIR/phase-default-deps.sh
 . $MEDIR/phase-default-cc-opts.sh

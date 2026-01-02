@@ -5,7 +5,7 @@
 # because we need two builds, one with X (gvim) and one without (vim)
 # run this script from the common parent of the two
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
 EXT=gvim
 VIMVERDIR=usr/local/share/vim/vim91
@@ -34,6 +34,7 @@ rm src/auto/config.cache
 	--disable-acl \
 	--disable-gpm \
 	--enable-gui=no \
+	--without-wayland \
 	--without-x \
 	|| exit
 

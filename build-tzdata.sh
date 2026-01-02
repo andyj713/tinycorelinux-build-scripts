@@ -1,14 +1,14 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
 EXT=tzdata
 
 . $MEDIR/phase-default-vars.sh
 . $MEDIR/phase-default-init.sh
 
-DEPS=""
+DEPS="lzip"
 
 . $MEDIR/phase-default-deps.sh
 . $MEDIR/phase-default-cc-opts.sh

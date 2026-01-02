@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
 FULLVER=${PWD##*-}
 PGMAJ=${FULLVER%%.*}
@@ -19,23 +19,17 @@ fi
 . $MEDIR/phase-default-vars.sh
 . $MEDIR/phase-default-init.sh
 
-DEPS="libxml2-dev libxslt-dev gettext perl5 tzdata tcl8.6-dev"
-
+XDEPS=""
 case $TCVER in
-        64-15 ) DEPS="$DEPS openssl-dev icu74-dev glibc_i18n_locale" ;;
-        32-15 ) DEPS="$DEPS openssl-dev icu70-dev glibc_i18n_locale" ;;
-        64-14 ) DEPS="$DEPS openssl-dev icu74-dev glibc_i18n_locale" ;;
-        32-14 ) DEPS="$DEPS openssl-dev icu70-dev glibc_i18n_locale" ;;
-        64-13 ) DEPS="$DEPS openssl-1.1.1-dev" ;;
-        32-13 ) DEPS="$DEPS openssl-1.1.1-dev" ;;
-        64-12 ) DEPS="$DEPS openssl-1.1.1-dev" ;;
-        32-12 ) DEPS="$DEPS openssl-1.1.1-dev" ;;
-        64-11 ) DEPS="$DEPS openssl-1.1.1-dev" ;;
-        32-11 ) DEPS="$DEPS openssl-1.1.1-dev" ;;
-        64-10 ) DEPS="$DEPS openssl-1.1.1-dev" ;;
-        32-10 ) DEPS="$DEPS openssl-1.1.1-dev" ;;
-        * ) DEPS="$DEPS openssl-dev" ;;
+        64-16 ) XDEPS="icu74-dev glibc_i18n_locale" ;;
+        32-16 ) XDEPS="icu70-dev glibc_i18n_locale" ;;
+        64-15 ) XDEPS="icu74-dev glibc_i18n_locale" ;;
+        32-15 ) XDEPS="icu70-dev glibc_i18n_locale" ;;
+        64-14 ) XDEPS="icu74-dev glibc_i18n_locale" ;;
+        32-14 ) XDEPS="icu70-dev glibc_i18n_locale" ;;
 esac
+
+DEPS="$DPDEPS $XDEPS libxml2-dev libxslt-dev gettext perl5 tzdata tcl8.6-dev"
 
 . $MEDIR/phase-default-deps.sh
 . $MEDIR/phase-default-cc-opts.sh

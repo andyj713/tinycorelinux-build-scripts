@@ -1,33 +1,17 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
 EXT=net-snmp
 
 . $MEDIR/phase-default-vars.sh
 . $MEDIR/phase-default-init.sh
 
-DEPS="libtool-dev cmake readline-dev liblzma-dev perl5 
+DEPS="$DBDEPS libtool-dev cmake readline-dev liblzma-dev perl5 
  libpcap-dev libpci-dev ncursesw-dev ncursesw-terminfo
  pcre-dev"
-# perl5 libxml2-python glib2-python python3.6-dev python3.6-setuptools
-
-case $TCVER in
-        64-15 ) DEPS="$DEPS openssl-dev mariadb-11.2-dev" ;;
-        32-15 ) DEPS="$DEPS openssl-dev mariadb-11.2-dev" ;;
-        64-14 ) DEPS="$DEPS openssl-dev mariadb-11.2-dev" ;;
-        32-14 ) DEPS="$DEPS openssl-dev mariadb-11.2-dev" ;;
-        64-13 ) DEPS="$DEPS openssl-1.1.1-dev mariadb-10.6-dev" ;;
-        32-13 ) DEPS="$DEPS openssl-1.1.1-dev mariadb-10.6-dev" ;;
-        64-12 ) DEPS="$DEPS openssl-1.1.1-dev mariadb-10.5-dev" ;;
-        32-12 ) DEPS="$DEPS openssl-1.1.1-dev mariadb-10.5-dev" ;;
-        64-11 ) DEPS="$DEPS openssl-1.1.1-dev mariadb-10.4-dev" ;;
-        32-11 ) DEPS="$DEPS openssl-1.1.1-dev mariadb-10.4-dev" ;;
-        64-10 ) DEPS="$DEPS openssl-1.1.1-dev mariadb-10.4-dev" ;;
-        32-10 ) DEPS="$DEPS openssl-1.1.1-dev mariadb-10.4-dev" ;;
-        * ) DEPS="$DEPS openssl-dev mariadb-11.2-dev" ;;
-esac
+# perl5 libxml2-python glib2-python python3.9-dev python3.9-setuptools
 
 . $MEDIR/phase-default-deps.sh
 . $MEDIR/phase-default-cc-opts.sh
@@ -36,16 +20,17 @@ echo $PATH | grep -q mysql || export PATH=$PATH:/usr/local/mysql/bin
 
 #sudo ln -s $(which python3) /usr/local/bin/python
 #	--with-python-modules \
+#	--with-perl-modules \
+#	--with-mysql \
 #	--without-kmem-usage \
 
-export CFLAGS="$CFLAGS -DHAVE_MYSQL_INIT=1 -DHAVE_MARIADB_LOAD_DEFAULTS=1"
+#export CFLAGS="$CFLAGS -DHAVE_MYSQL_INIT=1 -DHAVE_MARIADB_LOAD_DEFAULTS=1"
+export MAKEFLAGS=""
 
 ./configure \
 	--prefix=/usr/local \
 	--localstatedir=/var \
 	--disable-embedded-perl \
-	--with-mysql \
-	--with-perl-modules \
 	--with-openssl=/usr/local \
 	--with-defaults \
 	--without-rpm \

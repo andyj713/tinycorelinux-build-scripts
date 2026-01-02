@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 BASE=${BASE:-/mnt/sda1/lamp}
 
 EXT=xt_geoip_LE_IPv4

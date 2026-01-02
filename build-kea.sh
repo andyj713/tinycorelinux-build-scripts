@@ -1,23 +1,15 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
 EXT=kea
+PGVER=18
 
 . $MEDIR/phase-default-vars.sh
 . $MEDIR/phase-default-init.sh
 
-DEPS="log4cplus-dev"
-
-case $TCVER in
-	64-15 ) PGVER=16; SSLVER=""; MDBVER=11.2 ; DEPS="$DEPS boost-1.78-dev" ;;
-	32-15 ) PGVER=16; SSLVER=""; MDBVER=11.2 ; DEPS="$DEPS boost-1.78-dev" ;;
-	64-14 ) PGVER=15; SSLVER=""; MDBVER=11.2 ; DEPS="$DEPS boost-1.78-dev" ;;
-	32-14 ) PGVER=15; SSLVER=""; MDBVER=11.2 ; DEPS="$DEPS boost-1.78-dev" ;;
-	* ) PGVER=15; SSLVER="-1.1.1"; MDBVER=10.1 ; DEPS="$DEPS boost-1.78-dev" ;;
-esac
-DEPS="$DEPS openssl$SSLVER-dev postgresql-$PGVER-dev mariadb-$MDBVER-dev"
+DEPS="$DBDEPS log4cplus-dev boost-1.78-dev postgresql-$PGVER-dev"
 
 . $MEDIR/phase-default-deps.sh
 
@@ -46,7 +38,7 @@ KEASRC=$(pwd)/src
 	--localstatedir=/var \
 	--enable-shell \
 	--with-openssl \
-	--with-pgsql=/usr/local/pgsql15/bin/pg_config \
+	--with-pgsql=/usr/local/pgsql$PGVER/bin/pg_config \
 	--enable-pgsql-ssl \
 	|| exit
 

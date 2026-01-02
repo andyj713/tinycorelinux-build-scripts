@@ -1,33 +1,27 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
 EXT=lighttpd
 
 . $MEDIR/phase-default-vars.sh
 . $MEDIR/phase-default-init.sh
 
-DEPS="gdbm-dev cyrus-sasl-dev
-	attr-dev openldap-dev libxml2-dev sqlite3-dev
-	autoconf automake autogen"
-
 case $TCVER in
-        64-15 ) PGVER=16; SSLVER=""; MDBVER=11.2 ; PCREVER=21042 ;;
-        32-15 ) PGVER=16; SSLVER=""; MDBVER=11.2 ; PCREVER=21042 ;;
-        64-14 ) PGVER=15; SSLVER=""; MDBVER=11.2 ; PCREVER=21042 ;;
-        32-14 ) PGVER=15; SSLVER=""; MDBVER=11.2 ; PCREVER=21042 ;;
-        64-13 ) PGVER=14; SSLVER=-1.1.1; MDBVER=10.6 ; PCREVER=21032 ;;
-        32-13 ) PGVER=14; SSLVER=-1.1.1; MDBVER=10.6 ; PCREVER=2 ;;
-        64-12 ) PGVER=13; SSLVER=-1.1.1; MDBVER=10.5 ;;
-        32-12 ) PGVER=13; SSLVER=-1.1.1; MDBVER=10.5 ;;
-        64-11 ) PGVER=12; SSLVER=-1.1.1; MDBVER=10.4 ;;
-        32-11 ) PGVER=12; SSLVER=-1.1.1; MDBVER=10.4 ;;
-        64-10 ) PGVER=12; SSLVER=-1.1.1; MDBVER=10.4 ;;
-        32-10 ) PGVER=12; SSLVER=-1.1.1; MDBVER=10.4 ;;
-        * ) PGVER=11; SSLVER=""; MDBVER=10.1 ;;
+        64-16 ) PCREVER=21042 ;;
+        32-16 ) PCREVER=21042 ;;
+        64-15 ) PCREVER=21042 ;;
+        32-15 ) PCREVER=21042 ;;
+        64-14 ) PCREVER=21042 ;;
+        32-14 ) PCREVER=21042 ;;
+        64-13 ) PCREVER=21032 ;;
+        32-13 ) PCREVER=2 ;;
 esac
-DEPS="$DEPS openssl$SSLVER-dev postgresql-$PGVER-dev mariadb-$MDBVER-dev pcre$PCREVER-dev"
+
+DEPS="$DBDEPS gdbm-dev cyrus-sasl-dev
+	attr-dev openldap-dev libxml2-dev sqlite3-dev
+	autoconf automake autogen pcre$PCREVER-dev"
 
 ./autogen.sh
 

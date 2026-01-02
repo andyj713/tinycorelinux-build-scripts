@@ -1,30 +1,19 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
 EXT=cyrus-sasl-lite
 
 . $MEDIR/phase-default-vars.sh
 . $MEDIR/phase-default-init.sh
 
-DEPS="libtool-dev autoconf automake gdbm-dev groff"
+DEPS="$DBDEPS libtool-dev autoconf automake gdbm-dev groff"
 
-case $TCVER in
-        64-15 ) DEPS="$DEPS openssl-dev" ;;
-        32-15 ) DEPS="$DEPS openssl-dev" ;;
-        64-14 ) DEPS="$DEPS openssl-dev" ;;
-        32-14 ) DEPS="$DEPS openssl-dev" ;;
-        64-13 ) DEPS="$DEPS openssl-1.1.1-dev" ;;
-        32-13 ) DEPS="$DEPS openssl-1.1.1-dev" ;;
-        64-12 ) DEPS="$DEPS openssl-1.1.1-dev" ;;
-        32-12 ) DEPS="$DEPS openssl-1.1.1-dev" ;;
-        64-11 ) DEPS="$DEPS openssl-1.1.1-dev" ;;
-        32-11 ) DEPS="$DEPS openssl-1.1.1-dev" ;;
-        64-10 ) DEPS="$DEPS openssl-1.1.1-dev" ;;
-        32-10 ) DEPS="$DEPS openssl-1.1.1-dev" ;;
-        * ) DEPS="$DEPS openssl-dev" ;;
-esac
+for a in $(find $SOURCE/$EXT-patches -name "*.patch-$RVER"); do
+        echo "applying patch file $a"
+        patch -N -p 0 < $a       
+done           
 
 . $MEDIR/phase-default-deps.sh
 . $MEDIR/phase-cc-opts-no-flto.sh

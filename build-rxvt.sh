@@ -1,17 +1,17 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
 EXT=rxvt
 
 . $MEDIR/phase-default-vars.sh
-#. $MEDIR/phase-default-init.sh
+. $MEDIR/phase-default-init.sh
 
 #XP="--enable-transparency --enable-pixbuf"
+XP="--disable-transparency --disable-pixbuf"
 case "$RVER" in
-	9.31) DEPS="xorg-proto Xorg-7.7-dev fontconfig-dev libXft-dev ncursesw-utils" ; XP="--disable-transparency --disable-pixbuf" ;;
-	#9.31) DEPS="gdk-pixbuf2-dev xorg-proto Xorg-7.7-dev fontconfig-dev libXft-dev ncursesw-utils" ;;
+	9.31) DEPS="xorg-proto Xorg-7.7-dev fontconfig-dev libXft-dev ncursesw-utils" ;;
 	9.30) DEPS="gdk-pixbuf2-dev xorg-proto Xorg-7.7-dev fontconfig-dev libXft-dev ncursesw-utils" ;;
 	9.26) DEPS="gdk-pixbuf2-dev xorg-proto Xorg-7.7-dev fontconfig-dev libXft-dev ncursesw-utils" ;;
 	9.22) DEPS="xorg-proto Xorg-7.7-dev fontconfig-dev libXft-dev ncursesw-utils" ;;
@@ -21,9 +21,9 @@ esac
 . $MEDIR/phase-default-deps.sh
 . $MEDIR/phase-cc-opts-no-flto-excp.sh
 
-for a in $(find $SOURCE/$EXT-patches -name "*.patch-$RVER"); do
+for a in $(find $SOURCE/$EXT-patches -maxdepth 1 -name "*.patch-$RVER" | sort); do
 	echo "applying patch file $a"
-	patch -N -p 0 < $a
+	patch -N -p1 -i $a
 done
 #	--enable-24-bit-color \
 
@@ -31,12 +31,14 @@ done
 LDFLAGS="-lm" ./configure \
 	--prefix=/usr/local \
 	--localstatedir=/var \
+	--sysconfdir=/usr/local/etc \
 	--with-x \
-	--without-codesets \
+	--with-codesets=all \
 	--disable-assert \
 	--disable-warnings \
 	--enable-256-color \
-	--disable-unicode3 \
+	--enable-wide-glyphs \
+	--enable-unicode3 \
 	--enable-combining \
 	--enable-xft \
 	--enable-font-styles \
@@ -119,6 +121,14 @@ EOF
 mkdir -p $TCZ/usr/local/share/terminfo
 tic -x -o $TCZ/usr/local/share/terminfo doc/etc/rxvt-unicode.terminfo
 #chmod 644 $TCZ/usr/local/share/terminfo/r/rxvt-unicode
+
+mkdir -p $TCZ/usr/local/lib
+cp -a /usr/local/lib/libptytty.so* $TCZ/usr/local/lib
+
+mkdir -p $TCZ-dev/usr/local/include $TCZ-dev/usr/local/lib/pkgconfig $TCZ-dev/usr/local/share/man/man3
+cp /usr/local/include/libptytty.h $TCZ-dev/usr/local/include
+cp /usr/local/lib/pkgconfig/libptytty.pc $TCZ-dev/usr/local/lib/pkgconfig
+cp /usr/local/share/man/man3/libptytty.3 $TCZ-dev/usr/local/share/man/man3
 
 . $MEDIR/phase-default-strip.sh
 . $MEDIR/phase-default-set-perms.sh

@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
 EXT=libgd
 
@@ -11,6 +11,8 @@ EXT=libgd
 DEPS="automake libtool-dev perl5 libpng-dev fontconfig-dev libwebp1-dev"
 
 case $TCVER in
+	64-16 ) DEPS="$DEPS libvpx18-dev tiff-dev" ;;
+	32-16 ) DEPS="$DEPS libvpx18-dev libtiff-dev" ;;
 	64-15 ) DEPS="$DEPS libvpx18-dev tiff-dev" ;;
 	32-15 ) DEPS="$DEPS libvpx18-dev libtiff-dev" ;;
 	64-14 ) DEPS="$DEPS libvpx18-dev tiff-dev" ;;

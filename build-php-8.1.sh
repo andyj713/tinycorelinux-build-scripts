@@ -1,15 +1,35 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
-EXT=php-8.1
-PGVER=15
+EXTVER=8.1
+EXT=php-$EXTVER
 
 . $MEDIR/phase-default-vars.sh
 . $MEDIR/phase-default-init.sh
 
-DEPS="automake apache2.4 apache2.4-dev apr-dev apr-util-dev
+case $TCVER in
+        64-16 ) XDEPS="libvpx18-dev ncursesw-utils pcre21042-dev icu74-dev" ;;
+        32-16 ) XDEPS="libvpx18-dev pcre21042-dev icu70-dev" ;;
+        64-15 ) XDEPS="libvpx18-dev ncursesw-utils pcre21042-dev icu74-dev" ;;
+        32-15 ) XDEPS="libvpx18-dev pcre21042-dev icu70-dev" ;;
+        64-14 ) XDEPS="libvpx18-dev ncursesw-utils pcre21042-dev icu74-dev" ;;
+        32-14 ) XDEPS="libvpx18-dev pcre2-dev icu70-dev" ;;
+        64-13 ) XDEPS="libvpx18-dev ncursesw-utils pcre21032-dev icu67-dev" ;;
+        32-13 ) XDEPS="libvpx18-dev pcre2-dev icu62-dev" ;;
+        64-12 ) XDEPS="libvpx18-dev ncursesw-utils pcre21032-dev icu67-dev" ;;
+        32-12 ) XDEPS="libvpx18-dev pcre2-dev icu62-dev" ;;
+        64-11 ) XDEPS="libvpx18-dev ncursesw-utils pcre21032-dev icu61-dev" ;;
+        32-11 ) XDEPS="libvpx18-dev pcre2-dev icu62-dev" ;;
+        64-10 ) XDEPS="libvpx17-dev ncursesw-utils pcre21032-dev icu61-dev" ;;
+        32-10 ) XDEPS="libvpx17-dev pcre2-dev icu62-dev" ;;
+        64-9 ) XDEPS="libvpx-dev pcre2-dev icu61-dev" ;;
+        * ) XDEPS="libvpx-dev pcre2-dev icu-dev" ;;
+esac
+
+DEPS="$DBDEPS $XDEPS
+ automake apache2.4 apache2.4-dev apr-dev apr-util-dev
  openldap-dev libxml2-dev libffi-dev net-snmp-dev libgd-dev
  curl-dev enchant2-dev libwebp1-dev libnet-dev gmp-dev
  aspell-dev cyrus-sasl-dev libxslt-dev libonig-dev libzip-dev
@@ -17,27 +37,12 @@ DEPS="automake apache2.4 apache2.4-dev apr-dev apr-util-dev
  ncursesw-dev perl5 unixODBC-dev tzdata sqlite3-dev gdbm-dev
  oracle-12.2-client acl-dev"
 
-case $TCVER in
-        64-15 ) PGVER=16; DEPS="$DEPS openssl-dev postgresql-$PGVER-dev libvpx18-dev ncursesw-utils pcre21042-dev icu74-dev" ;;
-        32-15 ) PGVER=16; DEPS="$DEPS openssl-dev postgresql-$PGVER-dev libvpx18-dev pcre21042-dev icu70-dev" ;;
-        64-14 ) PGVER=16; DEPS="$DEPS openssl-dev postgresql-$PGVER-dev libvpx18-dev ncursesw-utils pcre21042-dev icu74-dev" ;;
-        32-14 ) PGVER=16; DEPS="$DEPS openssl-dev postgresql-$PGVER-dev libvpx18-dev pcre2-dev icu70-dev" ;;
-        64-13 ) PGVER=14; DEPS="$DEPS openssl-1.1.1-dev postgresql-$PGVER-dev libvpx18-dev ncursesw-utils pcre21032-dev icu67-dev" ;;
-        32-13 ) PGVER=14; DEPS="$DEPS openssl-1.1.1-dev postgresql-$PGVER-dev libvpx18-dev pcre2-dev icu62-dev" ;;
-        64-12 ) PGVER=13; DEPS="$DEPS openssl-1.1.1-dev postgresql-$PGVER-dev libvpx18-dev ncursesw-utils pcre21032-dev icu67-dev" ;;
-        32-12 ) PGVER=13; DEPS="$DEPS openssl-1.1.1-dev postgresql-$PGVER-dev libvpx18-dev pcre2-dev icu62-dev" ;;
-        64-11 ) DEPS="$DEPS openssl-1.1.1-dev postgresql-$PGVER-dev libvpx18-dev ncursesw-utils pcre21032-dev icu61-dev" ;;
-        32-11 ) DEPS="$DEPS openssl-1.1.1-dev postgresql-$PGVER-dev libvpx18-dev pcre2-dev icu62-dev" ;;
-        64-10 ) DEPS="$DEPS openssl-1.1.1-dev postgresql-$PGVER-dev libvpx17-dev ncursesw-utils pcre21032-dev icu61-dev" ;;
-        32-10 ) DEPS="$DEPS openssl-1.1.1-dev postgresql-$PGVER-dev libvpx17-dev pcre2-dev icu62-dev" ;;
-	64-9 ) PGVER=11; DEPS="$DEPS openssl-dev postgresql-$PGVER-dev libvpx-dev pcre2-dev icu61-dev" ;;
-        * ) DEPS="$DEPS openssl-dev libvpx-dev pcre2-dev icu-dev" ;;
-esac
-
 WITH_PIC="--with-pic=default"
 
 . $MEDIR/phase-default-deps.sh
 . $MEDIR/phase-cc-opts-no-flto-excp.sh
+
+sudo rm -f /usr/local/lib/php /usr/local/include/php /usr/local/bin/php*
 
 echo $PATH | grep -q pgsql || export PATH=$PATH:/usr/local/mysql/bin:/usr/local/pgsql$PGVER/bin:/usr/local/oracle
 
@@ -89,6 +94,7 @@ sed -i '/if test "\$PHP_LIBXML" != "no"; then/{N;N;s/ext_shared=no/ext_shared=ye
 
 # PEAR installer has too many bugs
 #	--with-pear=shared,/usr/local/lib/php/pear \
+#	--without-pear \
 
 EXTENSION_DIR=/usr/local/lib/php/extensions ./configure \
 	--prefix=/usr/local \
@@ -105,13 +111,17 @@ EXTENSION_DIR=/usr/local/lib/php/extensions ./configure \
 	--with-fpm-acl \
 	--enable-phpdbg \
 	--enable-phar=shared \
-	--without-pear \
+	--with-pear=shared,/usr/local/lib/php/pear \
 	--enable-dmalloc=shared \
 	--enable-libgcc \
 	--with-system-ciphers \
 	--enable-pdo=shared \
 	--disable-rpath \
 	--disable-static \
+	--with-jpeg \
+	--with-webp \
+	--with-xpm=no \
+	--with-freetype \
 	--with-apxs2=/usr/local/bin/apxs \
 	--with-libxml=shared \
 	--enable-xml=shared \
@@ -127,10 +137,6 @@ EXTENSION_DIR=/usr/local/lib/php/extensions ./configure \
 	--with-ffi=shared \
 	--enable-fileinfo=shared \
 	--enable-filter=shared \
-	--with-freetype \
-	--with-jpeg \
-	--with-webp \
-	--with-xpm=no \
 	--enable-ftp=shared \
 	--enable-gd=shared \
 	--with-external-gd \
@@ -140,6 +146,8 @@ EXTENSION_DIR=/usr/local/lib/php/extensions ./configure \
 	--with-gmp=shared \
 	--with-iconv=shared \
 	--enable-intl=shared \
+	--with-ldap=shared \
+	--with-ldap-sasl \
 	--enable-mbstring=shared \
 	--enable-mbregex \
 	--with-mhash=shared \
@@ -152,8 +160,6 @@ EXTENSION_DIR=/usr/local/lib/php/extensions ./configure \
 	--enable-pcntl=shared \
 	--with-external-pcre \
 	--with-pcre-jit \
-	--with-oci8=shared,instantclient,/usr/local/oracle \
-	--with-pdo-oci=shared,instantclient,/usr/local/oracle \
 	--with-unixODBC=shared \
 	--with-pdo-odbc=shared,unixODBC \
 	--with-pgsql=shared,/usr/local/pgsql$PGVER \
@@ -209,19 +215,27 @@ sed -i '9347s/-_/->_/' pear/install-pear-nozlib.phar
 
 make install INSTALL_ROOT=$TCZ-dev
 
-# Oracle OCI and OpenLDAP have macro conflicts, so compile LDAP after the rest are done
+# Oracle OCI and OpenLDAP have macro conflicts, so compile Oracle OCI after the rest are done
 sudo rm -f /usr/local/lib/php /usr/local/include/php /usr/local/bin/php*
 sudo ln -s $TCZ-dev/usr/local/lib/php /usr/local/lib/php
 sudo ln -s $TCZ-dev/usr/local/include/php /usr/local/include/php
 sudo cp $TCZ-dev/usr/local/bin/php* /usr/local/bin
 
-# make LDAP
-cd ext/ldap
+# make Oracle OCI
+cd ext/oci8
 /usr/local/bin/phpize
-./configure --with-ldap=shared --with-ldap-sasl
+./configure --with-oci8=shared,instantclient,/usr/local/oracle
 make install INSTALL_ROOT=$TCZ-dev
 cd ../..
-cp ext/ldap/modules/* modules
+cp ext/oci8/modules/* modules
+
+# make Oracle pdo_oci
+cd ext/pdo_oci
+/usr/local/bin/phpize
+./configure --with-pdo-oci=shared,instantclient,/usr/local/oracle
+make install INSTALL_ROOT=$TCZ-dev
+cd ../..
+cp ext/pdo_oci/modules/* modules
 
 sudo rm -f /usr/local/lib/php /usr/local/include/php /usr/local/bin/php*
 
@@ -399,10 +413,11 @@ mkdir -p $TCZ-ext/usr/local/lib/php
 mv $TCZ-dev/usr/local/lib/php/extensions $TCZ-ext/usr/local/lib/php
 mv $TCZ-dev/usr/local/etc $TCZ-ext/usr/local
 mkdir -p $TCZ-ext/usr/local/etc/php/extensions
-cp $BASE/contrib/php.ini-sample-8.0 $TCZ-ext/usr/local/etc/php
+cp $BASE/contrib/php.ini-sample-$EXTVER $TCZ-ext/usr/local/etc/php
 
 mkdir -p $TCZ-dev/usr/local/etc
 rm -rf $TCZ-dev/usr/local/etc/httpd
+rm -rf $TCZ-ext/usr/local/etc/httpd
 
 . $MEDIR/phase-default-strip.sh
 . $MEDIR/phase-default-set-perms.sh

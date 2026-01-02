@@ -1,31 +1,19 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
 EXT=cyrus-sasl
 
 . $MEDIR/phase-default-vars.sh
 . $MEDIR/phase-default-init.sh
 
-DEPS="openldap-dev gdbm-dev sqlite3-dev automake libtool-dev groff"
+DEPS="$DBDEPS openldap-dev gdbm-dev sqlite3-dev automake libtool-dev groff"
 
-case $TCVER in
-        64-15 ) PGVER=16; SSLVER=""; MDBVER=11.2 ;;
-        32-15 ) PGVER=16; SSLVER=""; MDBVER=11.2 ;;
-        64-14 ) PGVER=15; SSLVER=""; MDBVER=11.2 ;;
-        32-14 ) PGVER=15; SSLVER=""; MDBVER=11.2 ;;
-        64-13 ) PGVER=14; SSLVER=-1.1.1; MDBVER=10.6 ;;
-        32-13 ) PGVER=14; SSLVER=-1.1.1; MDBVER=10.6 ;;
-        64-12 ) PGVER=13; SSLVER=-1.1.1; MDBVER=10.5 ;;
-        32-12 ) PGVER=13; SSLVER=-1.1.1; MDBVER=10.5 ;;
-        64-11 ) PGVER=12; SSLVER=-1.1.1; MDBVER=10.4 ;;
-        32-11 ) PGVER=12; SSLVER=-1.1.1; MDBVER=10.4 ;;
-        64-10 ) PGVER=12; SSLVER=-1.1.1; MDBVER=10.4 ;;
-        32-10 ) PGVER=12; SSLVER=-1.1.1; MDBVER=10.4 ;;
-        * ) PGVER=11; SSLVER=""; MDBVER=10.1 ;;
-esac
-DEPS="$DEPS openssl$SSLVER-dev postgresql-$PGVER-dev mariadb-$MDBVER-dev"
+for a in $(find $SOURCE/$EXT-patches -name "*.patch-$RVER" | sort); do
+        echo "applying patch file $a"
+        patch -N -p 1 < $a
+done
 
 . $MEDIR/phase-default-deps.sh
 . $MEDIR/phase-default-cc-opts.sh

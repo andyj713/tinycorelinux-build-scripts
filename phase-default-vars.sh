@@ -8,3 +8,10 @@ BUILD=$LAMP/build
 STAGE=$LAMP/stage
 TCZTMP=$LAMP/tmp
 TCZ=$TCZTMP/$EXT/TCZ
+
+. $BASE/scripts/DEPS-$TCVER.sh
+                                                                     
+DBDEPS="openssl$SSLVER-dev postgresql-$PGVER-dev mariadb-$MDBVER-dev"
+
+export MAKEFLAGS="-j12"
+

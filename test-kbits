@@ -1,1 +1,0 @@
-test "$KBITS" = "64" && DEPS="$DEPS tiff-dev" || DEPS="$DEPS libtiff-dev"

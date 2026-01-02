@@ -1,41 +1,41 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
 EXT=rsyslog
 
 . $MEDIR/phase-default-vars.sh
 . $MEDIR/phase-default-init.sh
 
-DEPS="jemalloc-dev net-snmp-dev curl-dev libgcrypt-dev autoconf automake
+case $TCVER in
+        64-16 ) PCREVER=21042; TLSVER=38 ;;
+        32-16 ) PCREVER=21042; TLSVER=3.6 ;;
+        64-15 ) PCREVER=21042; TLSVER=35 ;;
+        32-15 ) PCREVER=21042; TLSVER=3.6 ;;
+        64-14 ) PCREVER=21042; TLSVER=35 ;;
+        32-14 ) PCREVER=21042; TLSVER=3.6 ;;
+esac
+
+DEPS="$DBDEPS pcre$PCREVER-dev jemalloc-dev net-snmp-dev curl-dev libgcrypt-dev
+ autoconf automake autogen-dev
  iproute2 libestr-dev libfastjson-dev liblognorm-dev liblogging-dev libnet-dev libnet"
 
-case $TCVER in
-        64-15 ) PGVER=16; SSLVER=""; MDBVER=11.2 ; DEPS="$DEPS pcre21042-dev gnutls35-dev" ;;
-        32-15 ) PGVER=16; SSLVER=""; MDBVER=11.2 ; DEPS="$DEPS pcre21042-dev gnutls3.6-dev" ;;
-        64-14 ) PGVER=15; SSLVER=""; MDBVER=11.2 ; DEPS="$DEPS pcre21042-dev gnutls35-dev" ;;
-        32-14 ) PGVER=15; SSLVER=""; MDBVER=11.2 ; DEPS="$DEPS pcre21042-dev gnutls3.6-dev" ;;
-        64-13 ) PGVER=14; SSLVER=-1.1.1; MDBVER=10.6 ; DEPS="$DEPS pcre-dev" ;;
-        32-13 ) PGVER=14; SSLVER=-1.1.1; MDBVER=10.6 ; DEPS="$DEPS pcre-dev" ;;
-        64-12 ) PGVER=13; SSLVER=-1.1.1; MDBVER=10.5 ; DEPS="$DEPS pcre-dev" ;;
-        32-12 ) PGVER=13; SSLVER=-1.1.1; MDBVER=10.5 ; DEPS="$DEPS pcre-dev" ;;
-        64-11 ) PGVER=12; SSLVER=-1.1.1; MDBVER=10.4 ; DEPS="$DEPS pcre-dev" ;;
-        32-11 ) PGVER=12; SSLVER=-1.1.1; MDBVER=10.4 ; DEPS="$DEPS pcre-dev" ;;
-        64-10 ) PGVER=12; SSLVER=-1.1.1; MDBVER=10.4 ; DEPS="$DEPS pcre-dev" ;;
-        32-10 ) PGVER=12; SSLVER=-1.1.1; MDBVER=10.4 ; DEPS="$DEPS pcre-dev" ;;
-        * ) PGVER=11; SSLVER=""; MDBVER=10.1 ; DEPS="$DEPS pcre-dev" ;;
-esac
-DEPS="$DEPS openssl$SSLVER-dev postgresql-$PGVER-dev mariadb-$MDBVER-dev"
+if [ "$TLSVER" != "" ] ; then
+	DEPS="$DEPS gnutls$TLSVER-dev"
+fi
 
 . $MEDIR/phase-default-deps.sh
+test $KBITS = 32 && MARCH=i586
 . $MEDIR/phase-default-cc-opts.sh
 
 echo $PATH | grep -q pgsql || export PATH=$PATH:/usr/local/mysql/bin:/usr/local/pgsql$PGVER/bin:/usr/local/oracle
 
 sed -i -e 's#"/etc/rsyslog.conf"#"/usr/local/etc/rsyslog.conf"#' tools/rsyslogd.c
 
-export PKG_CONFIG_PATH="/usr/local/pgsql$PGVER/lib/pkgconfig"
+export PKG_CONFIG_PATH="/usr/local/pgsql$PGVER/lib/pkgconfig:/usr/local/mysql/lib/pkgconfig"
+
+#export LDFLAGS="-latomic -latomic_ops -latomic_ops_gpl"
 
 autoreconf --verbose --force --install || exit 1
 
@@ -44,23 +44,24 @@ autoreconf --verbose --force --install || exit 1
 #sed -i -e 's/mysql_init()/mysql_init(NULL)/' configure
 #sed -i -e 's#\$MYSQL_CONFIG --libs#$MYSQL_CONFIG --libs | sed "s%/tmp/tcloop/mariadb-10.3-dev%%g"#' configure
 #sed -i -e 's#\$MYSQL_CONFIG --cflags#$MYSQL_CONFIG --cflags | sed "s%/tmp/tcloop/mariadb-10.3-dev%%g"#' configure
+#	--enable-fmpcre \
 
-./configure \
+./configure ap_cv_atomic_builtins_64=yes \
 	--prefix=/usr/local \
 	--localstatedir=/var \
 	--sysconfdir=/usr/local/etc \
 	--enable-shared \
 	--enable-regexp \
 	--enable-fmhash \
+	--enable-gnutls \
 	--enable-klog \
 	--enable-kmsg \
-	--disable-libsystemd \
-	--disable-debug \
-	--disable-imjournal \
-	--enable-inet \
-	--enable-jemalloc \
+	--enable-libsystemd=no \
+	--enable-debug=no \
 	--enable-diagtools \
 	--enable-usertools \
+	--enable-inet \
+	--enable-jemalloc \
 	--enable-mysql \
 	--enable-pgsql \
 	--enable-snmp \
@@ -68,7 +69,6 @@ autoreconf --verbose --force --install || exit 1
 	--enable-omhttp \
 	--enable-elasticsearch \
 	--enable-openssl \
-	--enable-gnutls \
 	--enable-libgcrypt \
 	--enable-libzstd \
 	--enable-rsyslogrt \
@@ -87,7 +87,6 @@ autoreconf --verbose --force --install || exit 1
 	--enable-omprog \
 	--enable-omudpspoof \
 	--enable-omstdout \
-	--disable-omjournal \
 	--enable-pmlastmsg \
 	--enable-pmcisconames \
 	--enable-pmciscoios \
@@ -96,12 +95,57 @@ autoreconf --verbose --force --install || exit 1
 	--enable-mmsnmptrapd \
 	--enable-omhttpfs \
 	--enable-omtcl \
-	--disable-generate-man-pages \
 	|| exit
 
 . $MEDIR/phase-default-make.sh
 . $MEDIR/phase-default-make-install.sh
 . $MEDIR/phase-default-strip.sh
+
+mkdir -p $TCZ/usr/local/etc
+cat >$TCZ/usr/local/etc/rsyslog.conf-sample <<'EOF'
+$WorkDirectory /srv/syslog/log/work
+
+# This would queue _ALL_ rsyslog messages, i.e. slow them down to rate of DB ingest.
+# Don't do that...
+# $MainMsgQueueFileName mainq  # set file name, also enables disk mode
+
+# We only want to queue for database writes.
+$ActionQueueType LinkedList	# use asynchronous processing
+$ActionQueueFileName dbq	# set file name, also enables disk mode
+$ActionResumeRetryCount -1	# infinite retries on insert failure
+
+# rsyslog Templates
+
+template (name="DynFile" type="string" string="/srv/syslog2/log/syslog-%$now-utc%.log")
+template (name="DynStat" type="string" string="/srv/syslog2/log/pstats-%$now-utc%.log")
+
+# rsyslog RuleSets
+
+action(type="omfile" dynafile="DynFile")
+if $syslogtag contains 'rsyslogd-pstats' then {
+        action(type="omfile" queue.type="linkedlist" queue.discardmark="980" name="pstats" dynafile="DynStat")
+        stop
+}
+
+# Load Modules
+
+module(load="imuxsock")	# provides support for local system logging (e.g. via logger command)
+module(load="imklog")	# provides kernel logging support (previously done by rklogd)
+module(load="immark")	# provides --MARK-- message capability
+module(load="impstats")
+
+# Provides UDP syslog reception
+module(load="imudp")
+input(type="imudp" port="514")
+
+# Provides TCP syslog reception
+module(load="imtcp")
+input(type="imtcp" port="514")
+
+# the project sample conf file is at https://github.com/rsyslog/rsyslog/blob/main/sample.conf
+
+EOF
+
 . $MEDIR/phase-default-set-perms.sh
 . $MEDIR/phase-default-squash-tcz.sh
 

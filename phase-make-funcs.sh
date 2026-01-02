@@ -55,6 +55,12 @@ build_one(){
 			sudo rm -rf $BUILD/$PROJ$SVER
 			lzip --decompress --keep --stdout $SOURCE/$SRC | tar x
 			;;
+		zst)
+			SVER=${SPROJ%.tar*}
+			echo "SVER=$SVER"
+			sudo rm -rf $BUILD/$PROJ$SVER
+			zstd --decompress --keep --stdout $SOURCE/$SRC | tar x
+			;;
 	esac
 	cd $BUILD/$PROJ$SVER
 	echo -e "\n=====  build-$PKG.sh =====\n"

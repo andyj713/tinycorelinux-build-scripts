@@ -1,34 +1,36 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
 EXT=nginx
 
 . $MEDIR/phase-default-vars.sh
 . $MEDIR/phase-default-init.sh
 
-DEPS="expat2-dev fontconfig-dev freetype-dev harfbuzz-dev libaio-dev
+case $TCVER in
+        64-16 ) XDEPS="pcre21042-dev giflib7-dev tiff-dev" ;;
+        32-16 ) XDEPS="pcre21042-dev giflib7-dev libtiff-dev" ;;
+        64-15 ) XDEPS="pcre21042-dev giflib7-dev tiff-dev" ;;
+        32-15 ) XDEPS="pcre21042-dev giflib7-dev libtiff-dev" ;;
+        64-14 ) XDEPS="pcre-dev giflib7-dev tiff-dev" ;;
+        32-14 ) XDEPS="pcre-dev giflib7-dev libtiff-dev" ;;
+        64-13 ) XDEPS="pcre-dev giflib7-dev tiff-dev" ;;
+        32-13 ) XDEPS="pcre-dev giflib7-dev libtiff-dev" ;;
+        64-12 ) XDEPS="pcre-dev giflib7-dev tiff-dev" ;;
+        32-12 ) XDEPS="pcre-dev giflib7-dev libtiff-dev" ;;
+        64-11 ) XDEPS="pcre-dev giflib7-dev tiff-dev" ;;
+        32-11 ) XDEPS="pcre-dev giflib7-dev libtiff-dev" ;;
+        64-10 ) XDEPS="pcre-dev giflib7-dev tiff-dev" ;;
+        32-10 ) XDEPS="pcre-dev giflib7-dev libtiff-dev" ;;
+        64-9 ) XDEPS="pcre-dev giflib-dev tiff-dev" ;;
+        32-9 ) XDEPS="pcre-dev giflib-dev libtiff-dev" ;;
+        * ) XDEPS="pcre-dev" ;;
+esac
+
+DEPS="$DBDEPS $XDEPS expat2-dev fontconfig-dev freetype-dev harfbuzz-dev libaio-dev
  libgd-dev libjpeg-turbo-dev libpng-dev libwebp1-dev libxml2-dev
  libxslt-dev zlib_base-dev"
-
-case $TCVER in
-        64-15 ) DEPS="$DEPS pcre21042-dev openssl-dev giflib7-dev tiff-dev" ;;
-        32-15 ) DEPS="$DEPS pcre21042-dev openssl-dev giflib7-dev libtiff-dev" ;;
-        64-14 ) DEPS="$DEPS pcre-dev openssl-dev giflib7-dev tiff-dev" ;;
-        32-14 ) DEPS="$DEPS pcre-dev openssl-dev giflib7-dev libtiff-dev" ;;
-        64-13 ) DEPS="$DEPS pcre-dev openssl-1.1.1-dev giflib7-dev tiff-dev" ;;
-        32-13 ) DEPS="$DEPS pcre-dev openssl-1.1.1-dev giflib7-dev libtiff-dev" ;;
-        64-12 ) DEPS="$DEPS pcre-dev openssl-1.1.1-dev giflib7-dev tiff-dev" ;;
-        32-12 ) DEPS="$DEPS pcre-dev openssl-1.1.1-dev giflib7-dev libtiff-dev" ;;
-        64-11 ) DEPS="$DEPS pcre-dev openssl-1.1.1-dev giflib7-dev tiff-dev" ;;
-        32-11 ) DEPS="$DEPS pcre-dev openssl-1.1.1-dev giflib7-dev libtiff-dev" ;;
-        64-10 ) DEPS="$DEPS pcre-dev openssl-1.1.1-dev giflib7-dev tiff-dev" ;;
-        32-10 ) DEPS="$DEPS pcre-dev openssl-1.1.1-dev giflib7-dev libtiff-dev" ;;
-        64-9 ) DEPS="$DEPS pcre-dev openssl-dev giflib-dev tiff-dev" ;;
-        32-9 ) DEPS="$DEPS pcre-dev openssl-dev giflib-dev libtiff-dev" ;;
-        * ) DEPS="$DEPS pcre-dev openssl-dev" ;;
-esac
 
 . $MEDIR/phase-default-deps.sh
 . $MEDIR/phase-default-cc-opts.sh

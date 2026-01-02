@@ -1,14 +1,14 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
 EXT=psqlodbc
 
 . $MEDIR/phase-default-vars.sh
 . $MEDIR/phase-default-init.sh
 
-DEPS="postgresql-15-dev postgresql-15 unixODBC-dev unixODBC"
+DEPS="postgresql-18-dev postgresql-18 unixODBC-dev unixODBC"
 
 . $MEDIR/phase-default-deps.sh
 . $MEDIR/phase-default-cc-opts.sh

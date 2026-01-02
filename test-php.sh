@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#cat php-full-test-list | while read PTEST LNAME; do make test TESTS=$PTEST 2>&1 | tee make-test-$LNAME.log; done
+cat php-full-test-list | while read PTEST LNAME; do make test TESTS=$PTEST 2>&1 | tee make-test-$LNAME.log; done
 
 echo -e "Test\t\tPass\tSkip\tFail" > php-full-test-results.log
 

@@ -1,32 +1,34 @@
 #!/bin/sh
 #
 ME=$(readlink -f "$0")
-MEDIR=${ME%/*}
+export MEDIR=${ME%/*}
 
 EXT=$1$2
 
 . $MEDIR/phase-default-vars.sh
 . $MEDIR/phase-default-init.sh
 
-DEPS="apr-dev apr-util-dev openldap-dev libxml2-dev net-snmp-dev unixODBC-dev
+DEPS="$DBDEPS apr-dev apr-util-dev openldap-dev libxml2-dev net-snmp-dev unixODBC-dev
 	libgd-dev curl-dev libwebp1-dev gmp-dev
 	cyrus-sasl-dev fontconfig-dev libXft-dev libnghttp2-dev xorg-server-dev perl5"
 
 case $TCVER in
-	64-15 ) DEPS="$DEPS libvpx18-dev postgresql-16-dev enchant2-dev pcre21042-dev icu74-dev lua-5.4-dev" ;;
-	32-15 ) DEPS="$DEPS libvpx18-dev postgresql-16-dev enchant2-dev pcre21042-dev icu70-dev lua-dev" ;;
-	64-14 ) DEPS="$DEPS libvpx18-dev postgresql-15-dev enchant2-dev icu74-dev lua-5.4-dev" ;;
-	32-14 ) DEPS="$DEPS libvpx18-dev postgresql-15-dev enchant2-dev icu70-dev lua-dev" ;;
-	64-13 ) DEPS="$DEPS libvpx18-dev postgresql-14-dev enchant2-dev icu67-dev lua-5.3-dev" ;;
-	32-13 ) DEPS="$DEPS libvpx18-dev postgresql-14-dev enchant-dev icu62-dev lua-dev" ;;
-	64-12 ) DEPS="$DEPS libvpx18-dev postgresql-13-dev enchant2-dev icu67-dev lua-5.3-dev" ;;
-	32-12 ) DEPS="$DEPS libvpx18-dev postgresql-13-dev enchant-dev icu62-dev lua-dev" ;;
-	64-11 ) DEPS="$DEPS libvpx18-dev postgresql-12-dev enchant2-dev icu61-dev lua-5.3-dev" ;;
-	32-11 ) DEPS="$DEPS libvpx18-dev postgresql-12-dev enchant-dev icu62-dev lua-dev" ;;
-	64-10 ) DEPS="$DEPS libvpx17-dev postgresql-12-dev enchant2-dev icu61-dev lua-5.3-dev" ;;
-	32-10 ) DEPS="$DEPS libvpx17-dev postgresql-12-dev enchant-dev icu62-dev lua-dev" ;;
-	64-9 ) DEPS="$DEPS postgresql-11-dev libvpx-dev enchant-dev icu61-dev lua-dev" ;;
-	* ) DEPS="$DEPS postgresql-11-dev libvpx-dev enchant-dev icu62-dev lua-dev" ;;
+	64-16 ) DEPS="$DEPS libvpx18-dev enchant2-dev pcre21042-dev icu74-dev lua-5.4-dev" ;;
+	32-16 ) DEPS="$DEPS libvpx18-dev enchant2-dev pcre21042-dev icu70-dev lua-dev" ;;
+	64-15 ) DEPS="$DEPS libvpx18-dev enchant2-dev pcre21042-dev icu74-dev lua-5.4-dev" ;;
+	32-15 ) DEPS="$DEPS libvpx18-dev enchant2-dev pcre21042-dev icu70-dev lua-dev" ;;
+	64-14 ) DEPS="$DEPS libvpx18-dev enchant2-dev icu74-dev lua-5.4-dev" ;;
+	32-14 ) DEPS="$DEPS libvpx18-dev enchant2-dev icu70-dev lua-dev" ;;
+	64-13 ) DEPS="$DEPS libvpx18-dev enchant2-dev icu67-dev lua-5.3-dev" ;;
+	32-13 ) DEPS="$DEPS libvpx18-dev enchant-dev icu62-dev lua-dev" ;;
+	64-12 ) DEPS="$DEPS libvpx18-dev enchant2-dev icu67-dev lua-5.3-dev" ;;
+	32-12 ) DEPS="$DEPS libvpx18-dev enchant-dev icu62-dev lua-dev" ;;
+	64-11 ) DEPS="$DEPS libvpx18-dev enchant2-dev icu61-dev lua-5.3-dev" ;;
+	32-11 ) DEPS="$DEPS libvpx18-dev enchant-dev icu62-dev lua-dev" ;;
+	64-10 ) DEPS="$DEPS libvpx17-dev enchant2-dev icu61-dev lua-5.3-dev" ;;
+	32-10 ) DEPS="$DEPS libvpx17-dev enchant-dev icu62-dev lua-dev" ;;
+	64-9 ) DEPS="$DEPS libvpx-dev enchant-dev icu61-dev lua-dev" ;;
+	* ) DEPS="$DEPS libvpx-dev enchant-dev icu62-dev lua-dev" ;;
 esac
 
 . $MEDIR/phase-default-deps.sh
