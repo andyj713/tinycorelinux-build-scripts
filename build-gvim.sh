@@ -10,15 +10,16 @@ export MEDIR=${ME%/*}
 EXT=gvim
 VIMVERDIR=usr/local/share/vim/vim91
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 SHDIR=$(pwd)
 
 DEPS="gettext glibc_gconv fontconfig-dev libXft-dev xorg-server-dev Xorg-7.7-dev gtk3-dev"
 
-. $MEDIR/phase-default-deps.sh
-. $MEDIR/phase-default-cc-opts.sh
+def_deps
+ccxx_opts lto noex
 
 cd $SHDIR/vim$1
 rm src/auto/config.cache
@@ -38,7 +39,7 @@ rm src/auto/config.cache
 	--without-x \
 	|| exit
 
-. $MEDIR/phase-default-make.sh
+def_make
 
 make install DESTDIR=$TCZ-vim || exit
 
@@ -59,7 +60,7 @@ rm src/auto/config.cache
 	--with-x \
 	|| exit
 
-. $MEDIR/phase-default-make.sh
+def_make
 
 make install DESTDIR=$TCZ-gvim || exit
 
@@ -97,8 +98,8 @@ for a in $(find $TCZ-gvim/usr/local -type f -name '*tutor*')
 	mv -f $a $b
 done
 
-. $MEDIR/phase-default-strip.sh
-. $MEDIR/phase-default-set-perms.sh
+def_strip
+set_perms
 
 mksquashfs $TCZ-vim $TCZTMP/$EXT/vim.tcz -noappend
 mksquashfs $TCZ-gvim $TCZTMP/$EXT/gvim.tcz -noappend

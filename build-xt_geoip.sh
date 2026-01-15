@@ -6,12 +6,13 @@ BASE=${BASE:-/mnt/sda1/lamp}
 
 EXT=xt_geoip_LE_IPv4
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 DEPS="xtables-addons-KERNEL tcl8.6 tcllib"
 
-. $MEDIR/phase-default-deps.sh
+def_deps
 
 mkdir -p $TCZ/usr/local/share/xt_geoip
 rm -rf LE
@@ -26,6 +27,6 @@ tclsh $BASE/contrib/xt_geoip_build.tcl
 
 cp -r LE $TCZ/usr/local/share/xt_geoip
 
-. $MEDIR/phase-default-set-perms.sh
-. $MEDIR/phase-default-squash-tcz.sh
+set_perms
+squash_tcz
 

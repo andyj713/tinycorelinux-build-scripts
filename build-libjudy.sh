@@ -5,13 +5,14 @@ export MEDIR=${ME%/*}
 
 EXT=libjudy
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 DEPS=""
 
-. $MEDIR/phase-default-deps.sh
-. $MEDIR/phase-default-cc-opts.sh
+def_deps
+ccxx_opts lto noex
 
 #	--enable-64-bit \
 
@@ -20,8 +21,8 @@ DEPS=""
 	--disable-static \
 	|| exit
 
-. $MEDIR/phase-default-make.sh
-. $MEDIR/phase-default-make-install.sh
+def_make
+make_inst
 
 mkdir -p $TCZ-doc/usr/local
 mv $TCZ/usr/local/share $TCZ-doc/usr/local
@@ -29,7 +30,7 @@ mv $TCZ/usr/local/share $TCZ-doc/usr/local
 mkdir -p $TCZ-dev/usr/local
 mv $TCZ/usr/local/include $TCZ-dev/usr/local
 
-. $MEDIR/phase-default-strip.sh
-. $MEDIR/phase-default-set-perms.sh
-. $MEDIR/phase-default-squash-tcz.sh
+def_strip
+set_perms
+squash_tcz
 

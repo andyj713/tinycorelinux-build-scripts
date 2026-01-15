@@ -5,14 +5,17 @@ export MEDIR=${ME%/*}
 
 EXT=$1$2
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 DEPS="$DBDEPS apr-dev apr-util-dev openldap-dev libxml2-dev net-snmp-dev unixODBC-dev
 	libgd-dev curl-dev libwebp1-dev gmp-dev
 	cyrus-sasl-dev fontconfig-dev libXft-dev libnghttp2-dev xorg-server-dev perl5"
 
 case $TCVER in
+	64-17 ) DEPS="$DEPS libvpx18-dev enchant2-dev pcre21042-dev icu74-dev lua-5.4-dev" ;;
+	32-17 ) DEPS="$DEPS libvpx18-dev enchant2-dev pcre21042-dev icu70-dev lua-dev" ;;
 	64-16 ) DEPS="$DEPS libvpx18-dev enchant2-dev pcre21042-dev icu74-dev lua-5.4-dev" ;;
 	32-16 ) DEPS="$DEPS libvpx18-dev enchant2-dev pcre21042-dev icu70-dev lua-dev" ;;
 	64-15 ) DEPS="$DEPS libvpx18-dev enchant2-dev pcre21042-dev icu74-dev lua-5.4-dev" ;;
@@ -31,8 +34,8 @@ case $TCVER in
 	* ) DEPS="$DEPS libvpx-dev enchant-dev icu62-dev lua-dev" ;;
 esac
 
-. $MEDIR/phase-default-deps.sh
-. $MEDIR/phase-default-cc-opts.sh
+def_deps
+ccxx_opts lto noex
 
 export C_INCLUDE_PATH=/usr/local/include/lua5.4:/usr/local/include/lua5.3
 
@@ -73,7 +76,7 @@ d4='DEFAULT_ERRORLOG=\"/var/log/httpd/error_log\"'
 
 make CFLAGS="-D$d1 -D$d2 -D$d3 -D$d4" || exit
 
-. $MEDIR/phase-default-make-install.sh
+make_inst
 
 rm -rf $TCZ/var
 mkdir -p $TCZ-dev/usr/local/apache2
@@ -140,8 +143,9 @@ mv $TCZ/usr/local/bin/apxs $TCZ-dev/usr/local/bin
 mv $TCZ/usr/local/apache2/man $TCZ-doc/usr/local/share
 mv $TCZ/usr/local/apache2/manual $TCZ-doc/usr/local/apache2
 
-. $MEDIR/phase-default-strip.sh
-. $MEDIR/phase-default-set-perms.sh
+def_strip
+set_perms
 sudo chmod u+s $TCZ/usr/local/sbin/suexec
 
-. $MEDIR/phase-default-squash-tcz.sh
+squash_tcz
+

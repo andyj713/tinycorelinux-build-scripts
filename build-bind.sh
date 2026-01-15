@@ -5,12 +5,15 @@ export MEDIR=${ME%/*}
 
 EXT=bind
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 PYDEPS=""
 NOPY=""
 case $TCVER in
+	64-17 ) PYDEPS="python3.9-dev py3.9-ply" ;;
+	32-17 ) PYDEPS="python3.6-dev python3.6-ply" ;;
 	64-16 ) PYDEPS="python3.9-dev py3.9-ply" ;;
 	32-16 ) PYDEPS="python3.6-dev python3.6-ply" ;;
 	64-15 ) PYDEPS="python3.9-dev py3.9-ply" ;;
@@ -31,8 +34,8 @@ esac
 DEPS="$DBDEPS $PYDEPS perl5 libuv-dev libcap-dev libpcap-dev jemalloc-dev
 	readline-dev zlib_base-dev libnghttp2-dev liburcu-dev"
 
-. $MEDIR/phase-default-deps.sh
-. $MEDIR/phase-default-cc-opts.sh
+def_deps
+ccxx_opts lto noex
 
 ./configure \
 	--prefix=/usr/local \
@@ -47,8 +50,8 @@ DEPS="$DBDEPS $PYDEPS perl5 libuv-dev libcap-dev libpcap-dev jemalloc-dev
 	--enable-linux-caps \
 	$NOPY || exit
 
-. $MEDIR/phase-default-make.sh
-. $MEDIR/phase-default-make-install.sh
+def_make
+make_inst
 
 rm -rf $TCZ/var
 
@@ -168,7 +171,7 @@ mv $TCZ/usr/local/include $TCZ-dev/usr/local
 mv $TCZ/usr/local/lib/*.la $TCZ-dev/usr/local/lib
 #rm $TCZ/usr/local/lib/*.la
 
-. $MEDIR/phase-default-strip.sh
-. $MEDIR/phase-default-set-perms.sh
-. $MEDIR/phase-default-squash-tcz.sh
+def_strip
+set_perms
+squash_tcz
 

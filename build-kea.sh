@@ -6,12 +6,13 @@ export MEDIR=${ME%/*}
 EXT=kea
 PGVER=18
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 DEPS="$DBDEPS log4cplus-dev boost-1.78-dev postgresql-$PGVER-dev"
 
-. $MEDIR/phase-default-deps.sh
+def_deps
 
 export CXXFLAGS="$CXXFLAGS -fexceptions" 
 
@@ -43,8 +44,8 @@ KEASRC=$(pwd)/src
 	|| exit
 
 #make clean
-. $MEDIR/phase-default-make.sh
-. $MEDIR/phase-make-install-dev.sh
+def_make
+make_dev
 
 #find $TCZ-dev/usr/local/lib -name '*.a' -exec rm {} \;
 
@@ -70,7 +71,7 @@ for a in doc man; do mv $TCZ-dev/usr/local/share/$a $TCZ-doc/usr/local/share; do
 for a in etc lib sbin; do mv $TCZ-dev/usr/local/$a $TCZ/usr/local; done
 mv $TCZ-dev/var $TCZ
 
-. $MEDIR/phase-default-strip.sh
-. $MEDIR/phase-default-set-perms.sh
-. $MEDIR/phase-default-squash-tcz.sh
+def_strip
+set_perms
+squash_tcz
 

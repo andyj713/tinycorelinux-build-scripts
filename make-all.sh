@@ -3,8 +3,10 @@
 ME=$(readlink -f "$0")
 export MEDIR=${ME%/*}
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-make-funcs.sh
+export NOLTO="$1"
+
+. $MEDIR/mkext-funcs.sh
+set_vars
 
 sudo chown -R root.staff /usr/local/tce.installed
 sudo chmod -R 775 /usr/local/tce.installed
@@ -122,7 +124,7 @@ done
 # tier 6
 
 for x in 8.1 8.2 8.3 8.4 8.5
-	do build_one php-$x
+	do build_one php php "-$x" "$x"
 done
 
 

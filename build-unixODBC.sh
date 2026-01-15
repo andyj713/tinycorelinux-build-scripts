@@ -5,16 +5,17 @@ export MEDIR=${ME%/*}
 
 EXT=unixODBC
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 DEPS="ncursesw-dev"
 
-. $MEDIR/phase-default-deps.sh
-. $MEDIR/phase-default-cc-opts.sh
-. $MEDIR/phase-default-config.sh
-. $MEDIR/phase-default-make.sh
-. $MEDIR/phase-make-install-dev.sh
+def_deps
+ccxx_opts lto noex
+def_conf
+def_make
+make_dev
 
 mkdir -p $TCZ/usr/local/lib
 mv $TCZ-dev/usr/local/lib/*.so* $TCZ/usr/local/lib
@@ -24,11 +25,11 @@ mv $TCZ-dev/usr/local/bin $TCZ/usr/local
 mkdir -p $TCZ-dev/usr/local/bin
 mv $TCZ/usr/local/bin/odbc_config $TCZ-dev/usr/local/bin
 
-. $MEDIR/phase-default-strip.sh
-. $MEDIR/phase-default-set-perms.sh
+def_strip
+set_perms
 
 sudo rm $TCZ/usr/local/etc/odbc*.ini
 sudo cp $BASE/contrib/odbc*-sample $TCZ/usr/local/etc
 
-. $MEDIR/phase-default-squash-tcz.sh
+squash_tcz
 

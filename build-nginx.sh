@@ -5,10 +5,13 @@ export MEDIR=${ME%/*}
 
 EXT=nginx
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 case $TCVER in
+        64-17 ) XDEPS="pcre21042-dev giflib7-dev tiff-dev" ;;
+        32-17 ) XDEPS="pcre21042-dev giflib7-dev libtiff-dev" ;;
         64-16 ) XDEPS="pcre21042-dev giflib7-dev tiff-dev" ;;
         32-16 ) XDEPS="pcre21042-dev giflib7-dev libtiff-dev" ;;
         64-15 ) XDEPS="pcre21042-dev giflib7-dev tiff-dev" ;;
@@ -32,8 +35,8 @@ DEPS="$DBDEPS $XDEPS expat2-dev fontconfig-dev freetype-dev harfbuzz-dev libaio-
  libgd-dev libjpeg-turbo-dev libpng-dev libwebp1-dev libxml2-dev
  libxslt-dev zlib_base-dev"
 
-. $MEDIR/phase-default-deps.sh
-. $MEDIR/phase-default-cc-opts.sh
+def_deps
+ccxx_opts lto noex
 
 export CCFLAGS="$CCFLAGS -shared -fPIC"
 export CCXFLAGS="$CCXFLAGS -shared -fPIC"
@@ -87,8 +90,8 @@ export CCXFLAGS="$CCXFLAGS -shared -fPIC"
 	--with-stream_ssl_preread_module \
 	|| exit
 
-. $MEDIR/phase-default-make.sh
-. $MEDIR/phase-default-make-install.sh
+def_make
+make_inst
 
 mkdir -p $TCZ/usr/local/etc/init.d
 cat >$TCZ/usr/local/etc/init.d/nginx <<'EOF'
@@ -168,10 +171,10 @@ for a in $TCZ/usr/local/etc/nginx/*.default; do rm $TCZ/usr/local/etc/nginx/$(ba
 mv $TCZ/usr/local/etc/nginx/*.default $TCZ/usr/local/etc/nginx/original
 chmod 777 $TCZ/var/log/nginx
 
-. $MEDIR/phase-default-strip.sh
-. $MEDIR/phase-default-set-perms.sh
+def_strip
+set_perms
 
 sudo chown -R root.staff $TCZ/usr/local/tce.installed
 
-. $MEDIR/phase-default-squash-tcz.sh
+squash_tcz
 

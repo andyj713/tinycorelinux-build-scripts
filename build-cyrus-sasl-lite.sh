@@ -5,8 +5,9 @@ export MEDIR=${ME%/*}
 
 EXT=cyrus-sasl-lite
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 DEPS="$DBDEPS libtool-dev autoconf automake gdbm-dev groff"
 
@@ -15,8 +16,8 @@ for a in $(find $SOURCE/$EXT-patches -name "*.patch-$RVER"); do
         patch -N -p 0 < $a       
 done           
 
-. $MEDIR/phase-default-deps.sh
-. $MEDIR/phase-cc-opts-no-flto.sh
+def_deps
+ccxx_opts "" noex
 
 #./autogen.sh \
 ./configure \
@@ -37,8 +38,8 @@ done
 
 find . -name Makefile -type f -exec sed -i 's/-g -O2//g' {} \;
 
-. $MEDIR/phase-default-make.sh
-. $MEDIR/phase-make-install-dev.sh
+def_make
+make_dev
 
 mkdir -p $TCZ/usr/local/etc/sasl2/db
 mkdir -p $TCZ/usr/local/lib/sasl2
@@ -47,7 +48,7 @@ mv $TCZ-dev/usr/local/sbin $TCZ/usr/local
 mv $TCZ-dev/usr/local/lib/*.so* $TCZ/usr/local/lib
 mv $TCZ-dev/usr/local/lib/sasl2/*.so* $TCZ/usr/local/lib/sasl2
 
-. $MEDIR/phase-default-strip.sh
-. $MEDIR/phase-default-set-perms.sh
-. $MEDIR/phase-default-squash-tcz.sh
+def_strip
+set_perms
+squash_tcz
 

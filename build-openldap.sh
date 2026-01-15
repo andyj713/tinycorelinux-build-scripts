@@ -5,14 +5,15 @@ export MEDIR=${ME%/*}
 
 EXT=openldap
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 DEPS="$DBDEPS libltdl groff unixODBC-dev cyrus-sasl-dev libtool-dev perl5"
 
-. $MEDIR/phase-default-deps.sh
-# . $MEDIR/phase-cc-opts-no-flto.sh
-. $MEDIR/phase-default-cc-opts.sh
+def_deps
+ccxx_opts "" noex
+ccxx_opts lto noex
 
 # break ICU detection so it will not be required
 sed -i 's/ol_cv_lib_icu=yes/ol_cv_lib_icu=no/' configure
@@ -55,10 +56,10 @@ sed -i 's/ol_cv_lib_icu=yes/ol_cv_lib_icu=no/' configure
 
 make depend || exit
 
-# . $MEDIR/phase-default-make.sh
+def_make
 make || exit
 
-. $MEDIR/phase-default-make-install.sh
+make_inst
 
 rm -rf $TCZ/opt/run
 
@@ -84,7 +85,7 @@ rm $TCZ/usr/local/etc/$EXT/ldap.conf
 rm $TCZ/usr/local/etc/$EXT/slapd.conf
 rm $TCZ/usr/local/etc/$EXT/slapd.ldif
 
-. $MEDIR/phase-default-strip.sh
-. $MEDIR/phase-set-perms-installed.sh
-. $MEDIR/phase-default-squash-tcz.sh
+def_strip
+set_perms_inst
+squash_tcz
 

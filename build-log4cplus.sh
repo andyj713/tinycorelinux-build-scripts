@@ -5,10 +5,11 @@ export MEDIR=${ME%/*}
 
 EXT=log4cplus
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
-. $MEDIR/phase-default-deps.sh
-. $MEDIR/phase-cc-opts-flto.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
+def_deps
+ccxx_opts lto ""
 
 export CXXFLAGS="$CXXFLAGS -fexceptions"
 
@@ -18,10 +19,10 @@ export CXXFLAGS="$CXXFLAGS -fexceptions"
 	--with-wchar_t-support \
 	|| exit
 
-. $MEDIR/phase-default-make.sh
-. $MEDIR/phase-make-install-dev.sh
-. $MEDIR/phase-default-move-dev.sh
-. $MEDIR/phase-default-strip.sh
-. $MEDIR/phase-default-set-perms.sh
-. $MEDIR/phase-default-squash-tcz.sh
+def_make
+make_dev
+def_move
+def_strip
+set_perms
+squash_tcz
 

@@ -5,16 +5,17 @@ export MEDIR=${ME%/*}
 
 EXT=net-snmp
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 DEPS="$DBDEPS libtool-dev cmake readline-dev liblzma-dev perl5 
  libpcap-dev libpci-dev ncursesw-dev ncursesw-terminfo
  pcre-dev"
 # perl5 libxml2-python glib2-python python3.9-dev python3.9-setuptools
 
-. $MEDIR/phase-default-deps.sh
-. $MEDIR/phase-default-cc-opts.sh
+def_deps
+ccxx_opts lto noex
 
 echo $PATH | grep -q mysql || export PATH=$PATH:/usr/local/mysql/bin
 
@@ -42,8 +43,8 @@ sed -i -e "/PYMAKE) install/s#basedir#root=$TCZ --basedir#" Makefile
 # configure option --without-kmem-usage is broken
 #sed -i -e '/define HAVE_KMEM/s%#define HAVE_KMEM "/dev/kmem"%/* #undef HAVE_KMEM */%' include/net-snmp/net-snmp-config.h
 
-. $MEDIR/phase-default-make.sh
-. $MEDIR/phase-default-make-install.sh
+def_make
+make_inst
 
 chmod -R ug+w $TCZ
 
@@ -59,7 +60,7 @@ mv $TCZ/usr/local/lib/*.la $TCZ-dev/usr/local/lib
 mv $TCZ/usr/local/share/man $TCZ-dev/usr/local/share
 mv $TCZ/usr/local/bin/net-snmp-config $TCZ-dev/usr/local/bin/net-snmp-config
 
-. $MEDIR/phase-default-strip.sh
-. $MEDIR/phase-default-set-perms.sh
-. $MEDIR/phase-default-squash-tcz.sh
+def_strip
+set_perms
+squash_tcz
 

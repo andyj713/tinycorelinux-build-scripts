@@ -6,8 +6,9 @@ export MEDIR=${ME%/*}
 KVER=$(uname -r)
 EXT=xtables-addons-$KVER
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 case $TCVER in
 	64-10 ) XDEPS="netfilter-KERNEL" ;;
@@ -17,8 +18,8 @@ esac
 
 DEPS="$XDEPS bash bc tcl8.6 glibc_apps iptables-dev"
 
-. $MEDIR/phase-default-deps.sh
-. $MEDIR/phase-default-cc-opts.sh
+def_deps
+ccxx_opts lto noex
 
 #sudo ln -sf $BASE$KBITS/kernel/linux-$KVER /lib/modules/$(uname -r)/build
 #[ -e /etc/sysconfig/tcedir/copy2fs.flg ] && \
@@ -38,7 +39,7 @@ for a in $(grep -r -l /usr/share/xt_geoip *); do sed -i -e 's#/usr/share/xt_geoi
 
 bash -c make || exit
 
-. $MEDIR/phase-default-make-install.sh
+make_inst
 
 gzip $TCZ/lib/modules/$KVER/updates/*.ko
 mkdir -p $TCZ/usr/local/lib/modules/$KVER/kernel
@@ -51,6 +52,6 @@ strip --strip-unneeded $TCZ/usr/local/sbin/*
 
 cp $BASE/contrib/xt_geoip_build.tcl $TCZ/usr/local/libexec/xtables-addons
 
-. $MEDIR/phase-default-set-perms.sh
-. $MEDIR/phase-default-squash-tcz.sh
+set_perms
+squash_tcz
 

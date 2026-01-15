@@ -5,8 +5,9 @@ export MEDIR=${ME%/*}
 
 EXT=rxvt
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 #XP="--enable-transparency --enable-pixbuf"
 XP="--disable-transparency --disable-pixbuf"
@@ -18,8 +19,8 @@ case "$RVER" in
 	*) DEPS="" ;;
 esac
 
-. $MEDIR/phase-default-deps.sh
-. $MEDIR/phase-cc-opts-no-flto-excp.sh
+def_deps
+ccxx_opts "" ""
 
 for a in $(find $SOURCE/$EXT-patches -maxdepth 1 -name "*.patch-$RVER" | sort); do
 	echo "applying patch file $a"
@@ -37,7 +38,7 @@ LDFLAGS="-lm" ./configure \
 	--disable-assert \
 	--disable-warnings \
 	--enable-256-color \
-	--enable-wide-glyphs \
+        --enable-wide-glyphs \
 	--enable-unicode3 \
 	--enable-combining \
 	--enable-xft \
@@ -66,7 +67,7 @@ LDFLAGS="-lm" ./configure \
 	--enable-pointer-blank \
 	$XP || exit
 
-. $MEDIR/phase-default-make.sh
+def_make
 
 make install DESTDIR=$TCZ
 
@@ -130,11 +131,11 @@ cp /usr/local/include/libptytty.h $TCZ-dev/usr/local/include
 cp /usr/local/lib/pkgconfig/libptytty.pc $TCZ-dev/usr/local/lib/pkgconfig
 cp /usr/local/share/man/man3/libptytty.3 $TCZ-dev/usr/local/share/man/man3
 
-. $MEDIR/phase-default-strip.sh
-. $MEDIR/phase-default-set-perms.sh
+def_strip
+set_perms
 
 sudo chown -R root.staff $TCZ/usr/local/tce.installed
 sudo chmod -R 775 $TCZ/usr/local/tce.installed
 
-. $MEDIR/phase-default-squash-tcz.sh
+squash_tcz
 

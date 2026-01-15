@@ -5,13 +5,14 @@ export MEDIR=${ME%/*}
 
 EXT=libsnappy
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 DEPS="cmake xz lzo-dev"
 
-. $MEDIR/phase-default-deps.sh
-. $MEDIR/phase-default-cc-opts.sh
+def_deps
+ccxx_opts lto noex
 
 #mkdir build
 #cd build
@@ -19,13 +20,13 @@ DEPS="cmake xz lzo-dev"
 
 ./configure
 
-. $MEDIR/phase-default-make.sh
-. $MEDIR/phase-make-install-dev.sh
-. $MEDIR/phase-default-move-dev.sh
+def_make
+make_dev
+def_move
 
 mv $TCZ-dev/usr/local/lib/libsnappy.a $TCZ/usr/local/lib
 
-. $MEDIR/phase-default-strip.sh
-. $MEDIR/phase-default-set-perms.sh
-. $MEDIR/phase-default-squash-tcz.sh
+def_strip
+set_perms
+squash_tcz
 

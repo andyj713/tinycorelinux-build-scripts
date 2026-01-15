@@ -3,8 +3,8 @@
 ME=$(readlink -f "$0")
 export MEDIR=${ME%/*}
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-make-funcs.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
 
 sudo chown -R root.staff /usr/local/tce.installed
 sudo chmod -R 775 /usr/local/tce.installed

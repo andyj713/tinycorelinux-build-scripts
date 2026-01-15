@@ -5,13 +5,14 @@ export MEDIR=${ME%/*}
 
 EXT=tzdata
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 DEPS="lzip"
 
-. $MEDIR/phase-default-deps.sh
-. $MEDIR/phase-default-cc-opts.sh
+def_deps
+ccxx_opts lto noex
 
 make USRDIR=usr/local DESTDIR=$TCZ install || exit
 
@@ -52,7 +53,7 @@ mv $TCZ/usr/local/sbin $TCZ-bin/usr/local
 mv $TCZ/usr/local/lib $TCZ-bin/usr/local
 rm -rf $TCZ/etc
 
-. $MEDIR/phase-default-strip.sh
-. $MEDIR/phase-set-perms-installed.sh
-. $MEDIR/phase-default-squash-tcz.sh
+def_strip
+set_perms_inst
+squash_tcz
 

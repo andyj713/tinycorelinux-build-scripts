@@ -5,8 +5,9 @@ export MEDIR=${ME%/*}
 
 EXT=open-vm-tools
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 DEPS="glibc_apps libtool-dev procps-ng-dev
  glib2-dev gtkmm-dev gtk3-dev glibmm-dev gdk-pixbuf2-dev
@@ -17,6 +18,8 @@ DEPS="glibc_apps libtool-dev procps-ng-dev
 USETIRPC=" --without-tirpc"
 
 case $TCVER in
+	64-17 ) DEPS="$DEPS pcre21042-dev fuse-dev libtirpc-dev rpcsvc-proto" ; USETIRPC=" --with-tirpc" ;;
+	32-17 ) DEPS="$DEPS pcre21042-dev fuse-dev libtirpc-dev rpcsvc-proto" ; USETIRPC=" --with-tirpc" ;;
 	64-16 ) DEPS="$DEPS pcre21042-dev fuse-dev libtirpc-dev rpcsvc-proto" ; USETIRPC=" --with-tirpc" ;;
 	32-16 ) DEPS="$DEPS pcre21042-dev fuse-dev libtirpc-dev rpcsvc-proto" ; USETIRPC=" --with-tirpc" ;;
 	64-15 ) DEPS="$DEPS pcre21042-dev fuse-dev libtirpc-dev rpcsvc-proto" ; USETIRPC=" --with-tirpc" ;;
@@ -34,8 +37,10 @@ case $TCVER in
         * ) DEPS="$DEPS libtirpc-dev pcre-dev fuse-dev" ; USETIRPC=" --with-tirpc" ;;
 esac                          
 
-. $MEDIR/phase-default-deps.sh
-. $MEDIR/phase-cc-opts-flto.sh
+def_deps
+ccxx_opts "lto" ""
+CC="$CC -std=gnu17"
+CXX="$CXX -std=gnu17"
 
 #if [ $(ldd --version | cut -d. -f2) -lt 32 ] ; then
 	export RPCGEN=$(readlink -f $(which rpcgen))
@@ -77,14 +82,15 @@ patch lib/system/systemLinux.c <<'EOF'
        fprintf(stderr, "Unable to execute %s command: \"%s\"\n",
 EOF
 
+#	--without-xerces \
+#	--without-xmlsecurity \
+
 ### create Makefiles
 ./configure \
 	--prefix=/usr/local \
 	--localstatedir=/var \
 	--sysconfdir=/etc \
 	--disable-static \
-	--without-xerces \
-	--without-xmlsecurity \
 	--without-xmlsec1 \
 	--without-pam \
 	--without-icu \
@@ -93,13 +99,14 @@ EOF
 	--enable-libappmonitor \
 	--enable-servicediscovery \
 	--enable-resolutionkms \
+	--enable-vmwgfxctrl \
 	--disable-deploypkg \
 	$USETIRPC || exit
 
 ### compile open-vm-tools
 
-. $MEDIR/phase-default-make.sh
-. $MEDIR/phase-default-make-install.sh
+def_make
+make_inst
 
 ### create tcz extension onload script
 
@@ -276,7 +283,7 @@ rm -rf $TCZ/usr/bin
 
 ### set file permissions and ownership
 
-. $MEDIR/phase-default-strip.sh
+def_strip
 
 chmod -R 755 $TCZ
 chmod -R 755 $TCZ-desktop
@@ -285,5 +292,5 @@ sudo chown -R root.staff $TCZ*/usr/local/tce.installed
 sudo chmod -R g+w $TCZ/usr/local/tce.installed
 sudo chmod u+s $TCZ-desktop/usr/local/bin/vmware-user-suid-wrapper
 
-. $MEDIR/phase-default-squash-tcz.sh
+squash_tcz
 

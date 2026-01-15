@@ -3,13 +3,27 @@
 ME=$(readlink -f "$0")
 export MEDIR=${ME%/*}
 
-EXTVER=8.3
+ME=$(readlink -f "$0")
+export MEDIR=${ME%/*}
+
+FULLVER=${PWD##*-}
+PHPMAJ=${FULLVER%%.*}
+MINPVER=${FULLVER#*.}
+PHPMIN=${MINPVER%%.*}
+
+EXTVER=$PHPMAJ.$PHPMIN
 EXT=php-$EXTVER
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+OCI8_VER="3.4.0"
+PDO_OCI_VER="1.2.0"
+
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 case $TCVER in
+        64-17 ) XDEPS="libvpx18-dev ncursesw-utils pcre21042-dev icu74-dev" ;;
+        32-17 ) XDEPS="libvpx18-dev pcre21042-dev icu70-dev" ;;
         64-16 ) XDEPS="libvpx18-dev ncursesw-utils pcre21042-dev icu74-dev" ;;
         32-16 ) XDEPS="libvpx18-dev pcre21042-dev icu70-dev" ;;
         64-15 ) XDEPS="libvpx18-dev ncursesw-utils pcre21042-dev icu74-dev" ;;
@@ -37,18 +51,14 @@ DEPS="$DBDEPS $XDEPS
  ncursesw-dev perl5 unixODBC-dev tzdata sqlite3-dev gdbm-dev
  oracle-12.2-client acl-dev"
 
-WITH_PIC="--with-pic=default"
-
-. $MEDIR/phase-default-deps.sh
-. $MEDIR/phase-cc-opts-no-flto-excp.sh
-
-export MAKEFLAGS=""
+def_deps
+ccxx_opts "" ""
 
 sudo rm -f /usr/local/lib/php /usr/local/include/php /usr/local/bin/php*
 
 echo $PATH | grep -q pgsql || export PATH=$PATH:/usr/local/mysql/bin:/usr/local/pgsql$PGVER/bin:/usr/local/oracle
 
-# compiled-in extensions: date, pcre, reflection, spl, standard, hash, json
+# compiled-in extensions: date, pcre, reflection, spl, standard, hash, json, url, random
 
 # stub for UTC-only internal timezone database
 # requires external timezone database for other time zones
@@ -88,20 +98,9 @@ done
 # fix to make libxml a shared extension
 sed -i '/if test "\$PHP_LIBXML" != "no"; then/{N;N;s/ext_shared=no/ext_shared=yes/}' configure
 
-# fix to make filter a shared extension
-#sed -i 's/if test -n "\$PHP_VERSION"; then/if test -z "$PHP_VERSION"; then/' configure
-
-# Oracle and openldap have name conflicts in their header files
-# Compile with OCI first, then make a second pass adding LDAP
-
-# PEAR installer has too many bugs
-#	--with-pear=shared,/usr/local/lib/php/pear \
-#	--without-pear \
-#	--with-jpeg \
-#	--with-webp \
-#	--with-xpm=no \
-#	--with-freetype \
-
+PHPOPS=""
+test "$PHPMIN" -le 4 && PHPOPS="--enable-opcache=shared"
+test "$PHPMIN" -le 3 && PHPOPS="$PHPOPS --with-pspell=shared"
 EXTENSION_DIR=/usr/local/lib/php/extensions ./configure \
 	--prefix=/usr/local \
 	--sysconfdir=/usr/local/etc \
@@ -157,7 +156,6 @@ EXTENSION_DIR=/usr/local/lib/php/extensions ./configure \
 	--with-mysqli=shared,mysqlnd \
 	--with-pdo-mysql=shared,mysqlnd \
 	--with-mysql-sock=/var/run/mysql.sock \
-	--enable-opcache=shared \
 	--with-openssl=shared \
 	--enable-pcntl=shared \
 	--with-external-pcre \
@@ -167,7 +165,6 @@ EXTENSION_DIR=/usr/local/lib/php/extensions ./configure \
 	--with-pgsql=shared,/usr/local/pgsql$PGVER \
 	--with-pdo-pgsql=shared,/usr/local/pgsql$PGVER \
 	--enable-posix=shared \
-	--with-pspell=shared \
 	--with-readline=shared \
 	--enable-session=shared \
 	--enable-shmop=shared \
@@ -190,7 +187,8 @@ EXTENSION_DIR=/usr/local/lib/php/extensions ./configure \
 	--with-zip=shared \
 	--with-zlib=shared \
 	--enable-zts \
-	$WITH_PIC || exit
+	--with-pic=default \
+	$PHPOPS || exit
 
 # fix for libxml unresolved references, LIBXML_SHARED_LIBADD missing from Makefile
 sed -i '\#shared_objects_libxml =#i \
@@ -198,7 +196,7 @@ LIBXML_SHARED_LIBADD = -L/usr/local/lib -lxml2' Makefile
 
 sed -i '/^#define CONFIGURE_COMMAND/c\#define CONFIGURE_COMMAND " ./configure --localstatedir=/var --sysconfdir=/usr/local/etc"' main/build-defs.h
 
-. $MEDIR/phase-default-make.sh
+def_make
 
 # fix module order for make test
 sed -i '/^PHP_MODULES =/s# \$(phplibdir)/mysqlnd.la##' Makefile
@@ -213,9 +211,8 @@ cp $BASE/contrib/httpd.conf $TCZ-dev/usr/local/etc/httpd
 sed -i '/^PEAR_INSTALL_FLAGS/s#$# -d extension_dir=$(top_builddir)/modules/ -d extension=libxml.so -d extension=xml.so -d extension=phar.so#' Makefile
 
 # fix typo in pear install file bug #81653
-sed -i '9347s/-_/->_/' pear/install-pear-nozlib.phar
-
-make install INSTALL_ROOT=$TCZ-dev
+#test "$PHPMIN" -le 3 && sed -i '9347s/-_/->_/' pear/install-pear-nozlib.phar
+make install INSTALL_ROOT=$TCZ-dev DESTDIR=$TCZ-dev
 
 # Oracle OCI and OpenLDAP have macro conflicts, so compile Oracle OCI after the rest are done
 sudo rm -f /usr/local/lib/php /usr/local/include/php /usr/local/bin/php*
@@ -224,7 +221,14 @@ sudo ln -s $TCZ-dev/usr/local/include/php /usr/local/include/php
 sudo cp $TCZ-dev/usr/local/bin/php* /usr/local/bin
 
 # make Oracle OCI
-cd ext/oci8
+if [ "$PHPMIN" -le 3 ] ; then
+	cd ext/oci8
+else
+	cd ext
+	tar xf $SOURCE/oci8-$OCI8_VER.tgz
+	mv oci8-$OCI8_VER oci8
+	cd oci8
+fi
 /usr/local/bin/phpize
 ./configure --with-oci8=shared,instantclient,/usr/local/oracle
 make install INSTALL_ROOT=$TCZ-dev
@@ -232,7 +236,14 @@ cd ../..
 cp ext/oci8/modules/* modules
 
 # make Oracle pdo_oci
-cd ext/pdo_oci
+if [ "$PHPMIN" -le 3 ] ; then
+	cd ext/pdo_oci
+else
+	cd ext
+	tar xf $SOURCE/pdo_oci-$PDO_OCI_VER.tgz
+	mv pdo_oci-$PDO_OCI_VER pdo_oci
+	cd pdo_oci
+fi
 /usr/local/bin/phpize
 ./configure --with-pdo-oci=shared,instantclient,/usr/local/oracle
 make install INSTALL_ROOT=$TCZ-dev
@@ -421,9 +432,9 @@ mkdir -p $TCZ-dev/usr/local/etc
 rm -rf $TCZ-dev/usr/local/etc/httpd
 rm -rf $TCZ-ext/usr/local/etc/httpd
 
-. $MEDIR/phase-default-strip.sh
-. $MEDIR/phase-default-set-perms.sh
-. $MEDIR/phase-default-squash-tcz.sh
+def_strip
+set_perms
+squash_tcz
 
 PHPDIR=$(pwd)
 cd $BASE/php-tests

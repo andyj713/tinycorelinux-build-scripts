@@ -5,16 +5,20 @@ export MEDIR=${ME%/*}
 
 EXT=dhcp
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 DEPS="perl5"
 
-. $MEDIR/phase-default-deps.sh
+def_deps
 test $KBITS = 32 && MARCH=i586
-. $MEDIR/phase-cc-opts-no-flto.sh
+ccxx_opts "" noex
 
 sed -i -e '/STD_CWARNINGS="$STD_CWARNINGS -Wall -Werror -fno-strict-aliasing"/s/ -Werror//' configure
+
+export CFLAGS="$CFLAGS -std=gnu17"
+#export MAKEFLAGS=""
 
 DBPATH=/opt/dhcp/db
 ./configure \
@@ -30,8 +34,8 @@ DBPATH=/opt/dhcp/db
 	|| exit
 
 #make clean
-. $MEDIR/phase-default-make.sh
-. $MEDIR/phase-make-install-dev.sh
+def_make
+make_dev
 
 mkdir -p $TCZ/usr/local/tce.installed
 
@@ -46,8 +50,8 @@ mv $TCZ-dev/usr/local/sbin $TCZ/usr/local
 mv $TCZ-dev/usr/local/etc $TCZ/usr/local
 cp client/scripts/linux $TCZ/usr/local/sbin/dhclient-script
 
-. $MEDIR/phase-default-strip.sh
-. $MEDIR/phase-default-set-perms.sh
-. $MEDIR/phase-default-squash-tcz.sh
+def_strip
+set_perms
+squash_tcz
 
 

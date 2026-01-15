@@ -5,10 +5,13 @@ export MEDIR=${ME%/*}
 
 EXT=lighttpd
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 case $TCVER in
+        64-17 ) PCREVER=21042 ;;
+        32-17 ) PCREVER=21042 ;;
         64-16 ) PCREVER=21042 ;;
         32-16 ) PCREVER=21042 ;;
         64-15 ) PCREVER=21042 ;;
@@ -25,8 +28,8 @@ DEPS="$DBDEPS gdbm-dev cyrus-sasl-dev
 
 ./autogen.sh
 
-. $MEDIR/phase-default-deps.sh
-. $MEDIR/phase-default-cc-opts.sh
+def_deps
+ccxx_opts lto noex
 
 ./configure \
 	--libdir=/usr/local/lib/lighttpd \
@@ -50,9 +53,9 @@ DEPS="$DBDEPS gdbm-dev cyrus-sasl-dev
 	--with-uuid \
 	|| exit
 
-. $MEDIR/phase-default-make.sh
-. $MEDIR/phase-default-make-install.sh
-. $MEDIR/phase-default-strip.sh
-. $MEDIR/phase-default-set-perms.sh
-. $MEDIR/phase-default-squash-tcz.sh
+def_make
+make_inst
+def_strip
+set_perms
+squash_tcz
 

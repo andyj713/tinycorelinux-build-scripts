@@ -16,11 +16,14 @@ else
 	PGDIR=pgsql$PGMAJ
 fi
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 XDEPS=""
 case $TCVER in
+        64-17 ) XDEPS="icu74-dev glibc_i18n_locale" ;;
+        32-17 ) XDEPS="icu70-dev glibc_i18n_locale" ;;
         64-16 ) XDEPS="icu74-dev glibc_i18n_locale" ;;
         32-16 ) XDEPS="icu70-dev glibc_i18n_locale" ;;
         64-15 ) XDEPS="icu74-dev glibc_i18n_locale" ;;
@@ -29,14 +32,17 @@ case $TCVER in
         32-14 ) XDEPS="icu70-dev glibc_i18n_locale" ;;
 esac
 
-DEPS="$DPDEPS $XDEPS libxml2-dev libxslt-dev gettext perl5 tzdata tcl8.6-dev"
+DEPS="$XDEPS openssl$SSLVER-dev libxml2-dev libxslt-dev gettext-dev perl5 tzdata tcl8.6-dev"
 
-. $MEDIR/phase-default-deps.sh
-. $MEDIR/phase-default-cc-opts.sh
+def_deps
+ccxx_opts lto noex
 
 for a in $(grep -l -r 'define NAMEDATALEN' *); do
 	sed -i -e 's/define NAMEDATALEN .*$/define NAMEDATALEN 128/' $a
 done
+
+export CFLAGS="$CFLAGS -std=gnu17"
+export MAKEFLAGS=""
 
 ./configure \
 	--prefix=/usr/local/$PGDIR \
@@ -53,8 +59,8 @@ done
 	--with-system-tzdata=/usr/local/share/zoneinfo \
 	|| exit
 
-. $MEDIR/phase-default-make.sh
-. $MEDIR/phase-default-make-install.sh
+def_make
+make_inst
 
 cd contrib && make && make install DESTDIR=$TCZ && cd .. || exit
 
@@ -82,7 +88,7 @@ ldconfig -q
 EOF
 done
 
-. $MEDIR/phase-default-strip.sh
-. $MEDIR/phase-default-set-perms.sh
-. $MEDIR/phase-default-squash-tcz.sh
+def_strip
+set_perms
+squash_tcz
 

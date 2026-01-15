@@ -5,10 +5,13 @@ export MEDIR=${ME%/*}
 
 EXT=rsyslog
 
-. $MEDIR/phase-default-vars.sh
-. $MEDIR/phase-default-init.sh
+. $MEDIR/mkext-funcs.sh
+set_vars
+def_init
 
 case $TCVER in
+        64-17 ) PCREVER=21042; TLSVER=38 ;;
+        32-17 ) PCREVER=21042; TLSVER=3.6 ;;
         64-16 ) PCREVER=21042; TLSVER=38 ;;
         32-16 ) PCREVER=21042; TLSVER=3.6 ;;
         64-15 ) PCREVER=21042; TLSVER=35 ;;
@@ -25,9 +28,9 @@ if [ "$TLSVER" != "" ] ; then
 	DEPS="$DEPS gnutls$TLSVER-dev"
 fi
 
-. $MEDIR/phase-default-deps.sh
+def_deps
 test $KBITS = 32 && MARCH=i586
-. $MEDIR/phase-default-cc-opts.sh
+ccxx_opts lto noex
 
 echo $PATH | grep -q pgsql || export PATH=$PATH:/usr/local/mysql/bin:/usr/local/pgsql$PGVER/bin:/usr/local/oracle
 
@@ -97,9 +100,9 @@ autoreconf --verbose --force --install || exit 1
 	--enable-omtcl \
 	|| exit
 
-. $MEDIR/phase-default-make.sh
-. $MEDIR/phase-default-make-install.sh
-. $MEDIR/phase-default-strip.sh
+def_make
+make_inst
+def_strip
 
 mkdir -p $TCZ/usr/local/etc
 cat >$TCZ/usr/local/etc/rsyslog.conf-sample <<'EOF'
@@ -146,6 +149,6 @@ input(type="imtcp" port="514")
 
 EOF
 
-. $MEDIR/phase-default-set-perms.sh
-. $MEDIR/phase-default-squash-tcz.sh
+set_perms
+squash_tcz
 
