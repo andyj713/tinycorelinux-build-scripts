@@ -54,6 +54,6 @@ mv $TCZ/usr/local/lib $TCZ-bin/usr/local
 rm -rf $TCZ/etc
 
 def_strip
-set_perms_inst
+set_perms
 squash_tcz
 

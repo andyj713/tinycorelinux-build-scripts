@@ -22,14 +22,14 @@ def_init
 
 XDEPS=""
 case $TCVER in
-        64-17 ) XDEPS="icu74-dev glibc_i18n_locale" ;;
-        32-17 ) XDEPS="icu70-dev glibc_i18n_locale" ;;
-        64-16 ) XDEPS="icu74-dev glibc_i18n_locale" ;;
-        32-16 ) XDEPS="icu70-dev glibc_i18n_locale" ;;
-        64-15 ) XDEPS="icu74-dev glibc_i18n_locale" ;;
-        32-15 ) XDEPS="icu70-dev glibc_i18n_locale" ;;
-        64-14 ) XDEPS="icu74-dev glibc_i18n_locale" ;;
-        32-14 ) XDEPS="icu70-dev glibc_i18n_locale" ;;
+        64-17 ) XDEPS="icu74-dev glibc_i18n_locale python3.14-dev" ;;
+        32-17 ) XDEPS="icu70-dev glibc_i18n_locale python3.14-dev" ;;
+        64-16 ) XDEPS="icu74-dev glibc_i18n_locale python3.9-dev" ;;
+        32-16 ) XDEPS="icu70-dev glibc_i18n_locale python3.9-dev" ;;
+        64-15 ) XDEPS="icu74-dev glibc_i18n_locale python3.9-dev" ;;
+        32-15 ) XDEPS="icu70-dev glibc_i18n_locale python3.9-dev" ;;
+        64-14 ) XDEPS="icu74-dev glibc_i18n_locale python3.6-dev" ;;
+        32-14 ) XDEPS="icu70-dev glibc_i18n_locale python3.6-dev" ;;
 esac
 
 DEPS="$XDEPS openssl$SSLVER-dev libxml2-dev libxslt-dev gettext-dev perl5 tzdata tcl8.6-dev"

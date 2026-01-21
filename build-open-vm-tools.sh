@@ -248,8 +248,8 @@ mkdir -p $TCZ-dev/usr/local/lib
 #mv $TCZ/usr/local/share $TCZ-dev/usr/local
 mv $TCZ/usr/local/include $TCZ-dev/usr/local
 mv $TCZ/usr/local/lib/pkgconfig $TCZ-dev/usr/local/lib
-mkdir -p $TCZ-dev/etc
-mv $TCZ/etc/pam.d $TCZ-dev/etc
+#mkdir -p $TCZ-dev/etc
+#mv $TCZ/etc/pam.d $TCZ-dev/etc
 for a in $(find $TCZ -name '*.la'); do
         b=$(echo $(dirname $a) | sed "s#$TCZ#$TCZ-dev#")
         mkdir -p $b
@@ -274,7 +274,7 @@ mv $TCZ/usr/local/lib/$EXT/plugins/vmusr $TCZ-desktop/usr/local/lib/$EXT/plugins
 mv $TCZ/usr/local/lib/$EXT/plugins/vmsvc/libresolutionKMS.so $TCZ-desktop/usr/local/lib/$EXT/plugins/vmsvc
 
 mkdir -p $TCZ-desktop/usr/local/bin
-mv $TCZ/usr/local/bin/vmware-user* $TCZ-desktop/usr/local/bin
+#mv $TCZ/usr/local/bin/vmware-user* $TCZ-desktop/usr/local/bin
 mv $TCZ/usr/local/bin/vmwgfxctrl $TCZ-desktop/usr/local/bin
 
 rm -rf $TCZ/lib

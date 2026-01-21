@@ -9,19 +9,15 @@ EXT=tcltls
 set_vars
 def_init
 
-DEPS="tcl8.6 tcl8.6-dev"
+DEPS="tcl8.6 tcl8.6-dev openssl$SSLVER-dev"
 
 def_deps
 ccxx_opts lto noex
-
-./configure \
-	--prefix=/usr/local \
-	|| exit
-
+def_conf
 def_make
 make_inst
 
-chmod -R ug+w $TCZ
+#chmod -R ug+w $TCZ
 
 def_strip
 set_perms

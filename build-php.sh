@@ -221,14 +221,12 @@ sudo ln -s $TCZ-dev/usr/local/include/php /usr/local/include/php
 sudo cp $TCZ-dev/usr/local/bin/php* /usr/local/bin
 
 # make Oracle OCI
-if [ "$PHPMIN" -le 3 ] ; then
-	cd ext/oci8
-else
-	cd ext
+cd ext
+if [ "$PHPMIN" -ge 4 ] ; then
 	tar xf $SOURCE/oci8-$OCI8_VER.tgz
 	mv oci8-$OCI8_VER oci8
-	cd oci8
 fi
+cd oci8
 /usr/local/bin/phpize
 ./configure --with-oci8=shared,instantclient,/usr/local/oracle
 make install INSTALL_ROOT=$TCZ-dev
@@ -236,14 +234,12 @@ cd ../..
 cp ext/oci8/modules/* modules
 
 # make Oracle pdo_oci
-if [ "$PHPMIN" -le 3 ] ; then
-	cd ext/pdo_oci
-else
-	cd ext
+cd ext
+if [ "$PHPMIN" -ge 4 ] ; then
 	tar xf $SOURCE/pdo_oci-$PDO_OCI_VER.tgz
 	mv pdo_oci-$PDO_OCI_VER pdo_oci
-	cd pdo_oci
 fi
+cd pdo_oci
 /usr/local/bin/phpize
 ./configure --with-pdo-oci=shared,instantclient,/usr/local/oracle
 make install INSTALL_ROOT=$TCZ-dev

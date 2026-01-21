@@ -1,4 +1,4 @@
-#!/bin/sh -v
+#!/bin/sh 
 #
 ME=$(readlink -f "$0")
 export MEDIR=${ME%/*}

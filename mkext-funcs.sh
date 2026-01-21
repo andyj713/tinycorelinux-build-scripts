@@ -3,124 +3,43 @@
 
 set_vars(){
 	test "$(uname -m)" = "x86_64" && KBITS=64 || KBITS=32
-	tcver=$(version)
-	TCVER=$KBITS-${tcver%.*}
+	TCVER=$KBITS-$(version -m)
 
 	BASE=/mnt/sda1/lamp
 	SOURCE=$BASE/src
-	SCRIPTS=$BASE/scripts                           
+	SCRIPTS=$BASE/scripts
 	TCEOPT=/etc/sysconfig/tcedir/optional
-                                         
+
 	LAMP=/mnt/sdb1/lamp$TCVER
 	BUILD=$LAMP/build
 	STAGE=$LAMP/stage
 	TCZTMP=$LAMP/tmp
 	TCZ=$TCZTMP/$EXT/TCZ
 
-	PROD="$SCRIPTS"                          
+	PROD="$SCRIPTS"
 
-	case $TCVER in 
-		32-10|32-11)
-			PGVER=12
-			SSLVER="1.1.1"
-			MDBVER=10.4
-			PYVER=3.6
-			;;
-		32-12)
-			PGVER=13
-			SSLVER="1.1.1"
-			MDBVER=10.5
-			PYVER=3.6
-			;;
-		32-13)
-			PGVER=14
-			SSLVER="1.1.1"
-			MDBVER=10.6
-			PYVER=3.6
-			;;
-		32-14)
-			PGVER=15
-			SSLVER=""
-			MDBVER=11.2
-			PYVER=3.6
-			;;
-		32-15)
-			PGVER=16
-			SSLVER=""
-			MDBVER=11.2
-			PYVER=3.9
-			;;
-		32-16)
-			PGVER=18
-			SSLVER=""
-			MDBVER=12.1
-			PYVER=3.9
-			LZVER="lzip"
-			MARCH=i486
-			;;
-		32-17)
-			PGVER=18
-			SSLVER=""
-			MDBVER=12.1
-			PYVER=3.9
-			LZVER="lzip"
-			MARCH=i486
-			;;
-		64-10|64-11)
-			PGVER=12
-			SSLVER="1.1.1"
-			MDBVER=10.4
-			PYVER=3.6
-			LZVER="lzip"
-			;;
-		64-12)
-			PGVER=13
-			SSLVER="1.1.1"
-			MDBVER=10.5
-			PYVER=3.6
-			LZVER="lzip"
-			;;
-		64-13)
-			PGVER=14
-			SSLVER="1.1.1"
-			MDBVER=10.6
-			PYVER=3.6
-			LZVER="lzip"
-			;;
-		64-14)
-			PGVER=15
-			SSLVER=""
-			MDBVER=11.2
-			PYVER=3.6
-			LZVER="lzip"
-			;;
-		64-15)
-			PGVER=16
-			SSLVER=""
-			MDBVER=11.2
-			PYVER=3.9
-			LZVER="lzip"
-			;;
-		64-16)
-			PGVER=18
-			SSLVER=""
-			MDBVER=12.1
-			PYVER=3.9
-			LZVER="lzip"
-			;;
-		64-17)
-			PGVER=18
-			SSLVER=""
-			MDBVER=12.1
-			PYVER=3.9
-			LZVER="lzip"
-			;;
+	case $TCVER in
+		64-17) PGVER=18 SSLVER=""	MDBVER=12.1 ;;
+		64-16) PGVER=18 SSLVER=""	MDBVER=12.1 ;;
+		64-15) PGVER=16 SSLVER=""	MDBVER=11.2 ;;
+		64-14) PGVER=15 SSLVER=""	MDBVER=11.2 ;;
+		64-13) PGVER=14 SSLVER="1.1.1"	MDBVER=10.6 ;;
+		64-12) PGVER=13 SSLVER="1.1.1"	MDBVER=10.5 ;;
+		64-11) PGVER=12 SSLVER="1.1.1"	MDBVER=10.4 ;;
+		64-10) PGVER=12 SSLVER="1.1.1"	MDBVER=10.4 ;;
+		32-17) PGVER=18 SSLVER=""	MDBVER=12.1 MARCH=i486 ;;
+		32-16) PGVER=18 SSLVER=""	MDBVER=12.1 MARCH=i486 ;;
+		32-15) PGVER=16 SSLVER=""	MDBVER=11.2 MARCH=i486 ;;
+		32-14) PGVER=15 SSLVER=""	MDBVER=11.2 MARCH=i486 ;;
+		32-13) PGVER=14 SSLVER="1.1.1"	MDBVER=10.6 MARCH=i486 ;;
+		32-12) PGVER=13 SSLVER="1.1.1"	MDBVER=10.5 MARCH=i486 ;;
+		32-11) PGVER=12 SSLVER="1.1.1"	MDBVER=10.4 MARCH=i486 ;;
+		32-10) PGVER=12 SSLVER="1.1.1"	MDBVER=10.4 MARCH=i486 ;;
 	esac
 
 	DBDEPS="openssl$SSLVER-dev postgresql-$PGVER-dev mariadb-$MDBVER-dev"
 
-	#JOBS=$(grep -m 1 'cpu cores' /proc/cpuinfo | sed 's/^.*: *//')
-	JOBS=$(nproc)
+	test $(which nproc) && JOBS=$(nproc) || JOBS=$(grep -m 1 'cpu cores' /proc/cpuinfo | sed 's/^.*: *//')
 	export MAKEFLAGS="-j$JOBS"
 }
 
@@ -130,7 +49,7 @@ def_init(){
 }
 
 def_deps(){
-	DEPS="compiletc bash file squashfs-tools coreutils $DEPS python$PYVER-dev $LZVER"
+	DEPS="compiletc bash file squashfs-tools coreutils $DEPS"
 
 	NOTFOUND=""
 	for a in $DEPS; do
@@ -155,6 +74,7 @@ def_conf(){
 		--localstatedir=/var \
 		--sysconfdir=/usr/local/etc \
 		--disable-static \
+		--disable-rpath \
 		|| exit
 }
 
@@ -189,22 +109,13 @@ def_strip(){
 }
 
 set_perms(){
-	for x in $(find $TCZTMP/$EXT -maxdepth 1 -name 'TCZ' -type d); do
-		sudo chown -R root.root $x
-		sudo chown -R root.staff $x/usr/local/tce.installed
-		sudo chmod -R 775 $x/usr/local/tce.installed
+	for x in $(find $TCZTMP/$EXT -maxdepth 1 -name 'TCZ*' -type d); do
+		sudo chown -R root:root $x
+		if [ -d $x/usr/local/tce.installed ]; then
+			sudo chown -R root:staff $x/usr/local/tce.installed
+			sudo chmod -R 775 $x/usr/local/tce.installed
+		fi
 	done
-	for x in $(find $TCZTMP/$EXT -maxdepth 1 -name 'TCZ-*' -type d); do
-		sudo chown -R root.root $x
-		sudo chown -R root.staff $x/usr/local/tce.installed
-		sudo chmod -R 775 $x/usr/local/tce.installed
-	done
-}
-
-set_perms_inst(){
-	sudo chown -R root.root $TCZ*
-	sudo chown -R root.staff $TCZ/usr/local/tce.installed
-	sudo chmod 775 $TCZ/usr/local/tce.installed/$EXT
 }
 
 squash_tcz(){
@@ -220,7 +131,7 @@ copy_tcz(){
         for a in $TCZTMP/$1/*.tcz; do
                 cp $a $STAGE
                 cp $a $TCEOPT
-		md5sum $a >$TCEOPT/$(basename $a).md5.txt
+#		md5sum $a >$TCEOPT/$(basename $a).md5.txt
         done
 }
 

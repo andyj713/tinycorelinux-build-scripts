@@ -23,7 +23,7 @@ make clean
 def_make
 make_dev
 
-mkdir -p $TCZ/usr/local/libexec
+#mkdir -p $TCZ/usr/local/libexec
 mkdir -p $TCZ/usr/local/lib
 mv $TCZ-dev/usr/local/share/nghttp2 $TCZ/usr/local/libexec
 mv $TCZ-dev/usr/local/lib/*.so* $TCZ/usr/local/lib

@@ -86,6 +86,6 @@ rm $TCZ/usr/local/etc/$EXT/slapd.conf
 rm $TCZ/usr/local/etc/$EXT/slapd.ldif
 
 def_strip
-set_perms_inst
+set_perms
 squash_tcz
 
